@@ -50,7 +50,8 @@ const ALLIANCES = [
 const DEFAULT_ALLIANCE_ID = 'main';
 const DEFAULT_TEAMS = Object.freeze([
     Object.freeze({ name: 'Main Team', color: '#3B82F6' }),
-    Object.freeze({ name: 'Counters', color: '#EF4444' })
+    Object.freeze({ name: 'Counters', color: '#f7ae28' }),
+    Object.freeze({ name: 'Turrets', color: '#ef4494' })
 ]);
 let activeAllianceId = DEFAULT_ALLIANCE_ID;
 const INACTIVE_ALLIANCE_ENTITY_FILL = 'rgba(156, 163, 175, 0.92)';
@@ -76,7 +77,7 @@ let territoryPreview = null;
 let cityLabelMode = defaultCityLabelMode;  // "march", "coords", "none"
 let waveMode = defaultWaveMode;
 let coordAnchor = { x: 600, y: 600 };
-let mapMode = 'base'; // 'base' or 'castle' (add island?)
+let mapMode = 'castle'; // 'base' or 'castle' (add island?)
 const castleReservedSize = 12; // Size of the reserved castle area
 const castleRedzoneThickness = 8; // Thickness of the redzone ring around the reserved area
 const selectionPulseDurationMs = 1400;
@@ -201,13 +202,13 @@ function resizeCanvas() {
     canvasHeight = window.innerHeight;
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
-    
+
     if (typeof window.__didInitialCenter === 'undefined') {
         panX = canvasWidth / 2;
         panY = canvasHeight / 2;
         window.__didInitialCenter = true;
     }
-    
+
     redraw();
     updateZoomDisplay();
 }
@@ -222,7 +223,7 @@ function screenToDiamond(screenX, screenY) {
     // Convert to diamond grid system
     const diamondX = (offsetX + offsetY) / currentGridSize;
     const diamondY = (offsetY - offsetX) / currentGridSize;
-    
+
     return {
         x: Math.floor(diamondX),
         y: Math.floor(diamondY)
@@ -235,10 +236,10 @@ function diamondToScreen(gridX, gridY, pX, pY, z) {
     // Add 0.5 to center the objects within the diamond cells
     const centerX = gridX + 0.5;
     const centerY = gridY + 0.5;
-    
+
     const offsetX = (centerX - centerY) * currentGridSize * 0.5;
     const offsetY = (centerX + centerY) * currentGridSize * 0.5;
-    
+
     return {
         x: offsetX + pX,
         y: offsetY + pY
@@ -250,7 +251,7 @@ function diamondToScreenCorner(gridX, gridY, pX, pY, z) {
     const currentGridSize = baseGridSize * z;
     const offsetX = (gridX - gridY) * currentGridSize * 0.5;
     const offsetY = (gridX + gridY) * currentGridSize * 0.5;
-    
+
     return {
         x: offsetX + pX,
         y: offsetY + pY
@@ -293,28 +294,28 @@ function drawDiamondGrid(context, pX, pY, z) {
     const w = context.canvas.width;
     const h = context.canvas.height;
     context.clearRect(0, 0, w, h);
-    
+
     // Create gradient background
     const gradient = context.createLinearGradient(0, 0, w, h);
     gradient.addColorStop(0, '#667eea');
     gradient.addColorStop(1, '#764ba2');
     context.fillStyle = gradient;
     context.fillRect(0, 0, w, h);
-    
+
     context.save();
     context.strokeStyle = 'rgba(255, 255, 255, 0.3)';
     context.lineWidth = 1;
-    
+
     // Draw diamond grid lines
     for (let x = -gridCols; x <= gridCols; x++) {
         for (let y = -gridRows; y <= gridRows; y++) {
             const screen = diamondToScreenCorner(x, y, pX, pY, z);
             const screen2 = diamondToScreenCorner(x + 1, y, pX, pY, z);
             const screen3 = diamondToScreenCorner(x, y + 1, pX, pY, z);
-            
-            if (screen.x > -100 && screen.x < w + 100 && 
+
+            if (screen.x > -100 && screen.x < w + 100 &&
                 screen.y > -100 && screen.y < h + 100) {
-                
+
                 // Draw grid cell as diamond
                 context.beginPath();
                 context.moveTo(screen.x, screen.y);
@@ -326,7 +327,7 @@ function drawDiamondGrid(context, pX, pY, z) {
             }
         }
     }
-    
+
     // Draw center marker
     context.fillStyle = 'rgba(255, 100, 100, 0.8)';
     context.beginPath();
@@ -444,12 +445,12 @@ function drawEntities(context, pX, pY, z) {
     // Draw entities
     entities.forEach(entity => {
         drawEntity(context, pX, pY, z, entity, protectedAreasByAlliance);
-        
+
         if (selectedEntity === entity) {
             drawSelectionHighlight(context, pX, pY, z, entity);
         }
     });
-    
+
     // Draw ghost preview if applicable
     if (ghostPreview) {
         drawGhostEntity(context, pX, pY, z, ghostPreview);
@@ -463,7 +464,7 @@ function drawEntities(context, pX, pY, z) {
 
 function drawEntity(context, pX, pY, z, entity, protectedAreasByAlliance) {
     context.save();
-    
+
     const screen = diamondToScreen(entity.x, entity.y, pX, pY, z);
     const currentGridSize = baseGridSize * z;
     const isInactiveAllianceEntity = isInInactiveAllianceView(entity);
@@ -471,8 +472,8 @@ function drawEntity(context, pX, pY, z, entity, protectedAreasByAlliance) {
     if (isInactiveAllianceEntity) {
         context.globalAlpha = 0.82;
     }
-    
-    
+
+
     if (entity.type === 'city') {
         if (isInactiveAllianceEntity) {
             context.fillStyle = INACTIVE_ALLIANCE_ENTITY_FILL;
@@ -485,7 +486,7 @@ function drawEntity(context, pX, pY, z, entity, protectedAreasByAlliance) {
         context.fillStyle = isInactiveAllianceEntity ? INACTIVE_ALLIANCE_ENTITY_FILL : entity.color;
     }
 
-    
+
     // Draw entity based on its actual size (width x height)
     if (entity.width === 1 && entity.height === 1) {
         // Flag: 1x1 - single diamond cell
@@ -501,7 +502,7 @@ function drawEntity(context, pX, pY, z, entity, protectedAreasByAlliance) {
         // City (2x2) or Bear Trap (3x3)
         // Calculate all corner points for the entire entity area
         const corners = [];
-        
+
         // Get all grid cell corners that form the outer boundary
         for (let dx = 0; dx <= entity.width; dx++) {
             for (let dy = 0; dy <= entity.height; dy++) {
@@ -509,13 +510,13 @@ function drawEntity(context, pX, pY, z, entity, protectedAreasByAlliance) {
                 corners.push({ x: corner.x, y: corner.y, gridX: entity.x + dx, gridY: entity.y + dy });
             }
         }
-        
+
         // Draw the filled area using the outer boundary
         const topLeft = diamondToScreenCorner(entity.x, entity.y, pX, pY, z);
         const topRight = diamondToScreenCorner(entity.x + entity.width, entity.y, pX, pY, z);
         const bottomLeft = diamondToScreenCorner(entity.x, entity.y + entity.height, pX, pY, z);
         const bottomRight = diamondToScreenCorner(entity.x + entity.width, entity.y + entity.height, pX, pY, z);
-        
+
         context.beginPath();
         context.moveTo(topLeft.x, topLeft.y);
         context.lineTo(topRight.x, topRight.y);
@@ -524,7 +525,7 @@ function drawEntity(context, pX, pY, z, entity, protectedAreasByAlliance) {
         context.closePath();
         context.fill();
     }
-    
+
     // Draw border around the entire entity
 
     // For cities outside protected areas, use red border; otherwise use black
@@ -541,7 +542,7 @@ function drawEntity(context, pX, pY, z, entity, protectedAreasByAlliance) {
         context.strokeStyle = 'rgba(0, 0, 0, 0.9)';
         context.lineWidth = Math.max(1, 2 * z);
     }
-    
+
     if (entity.width === 1 && entity.height === 1) {
         // Single cell border
         const fillSize = currentGridSize * 0.9;
@@ -558,7 +559,7 @@ function drawEntity(context, pX, pY, z, entity, protectedAreasByAlliance) {
         const topRight = diamondToScreenCorner(entity.x + entity.width, entity.y, pX, pY, z);
         const bottomLeft = diamondToScreenCorner(entity.x, entity.y + entity.height, pX, pY, z);
         const bottomRight = diamondToScreenCorner(entity.x + entity.width, entity.y + entity.height, pX, pY, z);
-        
+
         context.beginPath();
         context.moveTo(topLeft.x, topLeft.y);
         context.lineTo(topRight.x, topRight.y);
@@ -567,7 +568,7 @@ function drawEntity(context, pX, pY, z, entity, protectedAreasByAlliance) {
         context.closePath();
         context.stroke();
     }
-    
+
     // Draw labels in center of entity
     const centerScreen = diamondToScreen(entity.x + entity.width/2 - 0.5, entity.y + entity.height/2 - 0.5, pX, pY, z);
     if (entity.type === 'city') {
@@ -600,16 +601,16 @@ function drawEntity(context, pX, pY, z, entity, protectedAreasByAlliance) {
     } else if (entity.type === 'enemyzone') {
         drawEnemyZoneDetails(context, z, entity, centerScreen);
     }
-    
+
     context.restore();
 }
 
 function drawGhostEntity(context, pX, pY, z, entity) {
     context.save();
-    
+
     const screen = diamondToScreen(entity.x, entity.y, pX, pY, z);
     const currentGridSize = baseGridSize * z;
-    
+
     // Helper function to draw the entity path
     const drawEntityPath = () => {
         if (entity.width === 1 && entity.height === 1) {
@@ -627,7 +628,7 @@ function drawGhostEntity(context, pX, pY, z, entity) {
             const topRight = diamondToScreenCorner(entity.x + entity.width, entity.y, pX, pY, z);
             const bottomLeft = diamondToScreenCorner(entity.x, entity.y + entity.height, pX, pY, z);
             const bottomRight = diamondToScreenCorner(entity.x + entity.width, entity.y + entity.height, pX, pY, z);
-            
+
             context.beginPath();
             context.moveTo(topLeft.x, topLeft.y);
             context.lineTo(topRight.x, topRight.y);
@@ -636,13 +637,13 @@ function drawGhostEntity(context, pX, pY, z, entity) {
             context.closePath();
         }
     };
-    
+
     // Fill the ghost entity
     context.globalAlpha = 0.5;
     context.fillStyle = '#888888';
     drawEntityPath();
     context.fill();
-    
+
     // Draw dashed border for ghost
     context.globalAlpha = 0.8;
     context.strokeStyle = '#666666';
@@ -650,27 +651,27 @@ function drawGhostEntity(context, pX, pY, z, entity) {
     context.setLineDash([3 * z, 3 * z]);
     drawEntityPath();
     context.stroke();
-    
+
     context.restore();
 }
 
 function drawCityDetails(context, z, city, screen) {
     // Text is always black for readability
     context.fillStyle = 'black';
-    
+
     // Scale font size, with minimum and maximum limits
     const currentGridSize = baseGridSize * z;
     const baseFontSize = Math.max(6, Math.min(16, currentGridSize * 0.25));
     context.font = `${baseFontSize}px Arial`;
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    
+
     // Shift text upward to accommodate multiple bear trap times
     const baseOffset = -currentGridSize * 0.29;
-    
+
     const label = city.name || `City ${city.id}`;
     context.fillText(label, screen.x, screen.y + baseOffset);
-    
+
     // Draw march times only if enabled
     if (cityLabelMode === 'march') {
         const marchTimes = calculateMarchTimes(city);
@@ -688,7 +689,7 @@ function drawCityDetails(context, z, city, screen) {
         }
     }
 
-    // ---- Show city coordinates relative to anchor ----  
+    // ---- Show city coordinates relative to anchor ----
     if (cityLabelMode === 'coords') {
         const c = coordForCity(city);
         const fs = Math.max(6, Math.min(14, baseGridSize * z * 0.22));
@@ -703,13 +704,13 @@ function drawCityDetails(context, z, city, screen) {
 
 function drawBearTrapDetails(context, z, trap, screen) {
     context.fillStyle = 'white';
-    
+
     const currentGridSize = baseGridSize * z;
     const baseFontSize = Math.max(8, Math.min(20, currentGridSize * 0.3));
     context.font = `${baseFontSize}px Arial`;
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    
+
     const trapIndex = getAllianceTrapIndex(trap);
     const allianceShort = getAllianceShort(getEntityAllianceId(trap));
     context.fillText(`${allianceShort}BT${trapIndex}`, screen.x, screen.y);
@@ -717,32 +718,32 @@ function drawBearTrapDetails(context, z, trap, screen) {
 
 function drawHQDetails(context, z, hq, screen) {
     context.fillStyle = 'white';
-    
+
     const currentGridSize = baseGridSize * z;
     const baseFontSize = Math.max(8, Math.min(20, currentGridSize * 0.3));
     context.font = `${baseFontSize}px Arial`;
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    
+
     context.fillText('HQ', screen.x, screen.y);
 }
 
 function drawNodeDetails(context, z, node, screen) {
     context.fillStyle = 'white';
-    
+
     const currentGridSize = baseGridSize * z;
     const baseFontSize = Math.max(6, Math.min(18, currentGridSize * 0.25));
     context.font = `${baseFontSize}px Arial`;
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    
+
     context.fillText('NODE', screen.x, screen.y);
 }
 
 function drawObstacleDetails(context, z, obstacle, screen) {
     context.fillStyle = 'white';
-    
-    // Scale font size with both grid size and zoom, with minimum and maximum limits  
+
+    // Scale font size with both grid size and zoom, with minimum and maximum limits
     const currentGridSize = baseGridSize * z;
     const baseFontSize = Math.max(4, Math.min(12, currentGridSize * 0.2));
     context.font = `${baseFontSize}px Arial`;
@@ -757,7 +758,7 @@ function drawEnemyZoneDetails(context, z, zone, screen) {
     context.font = `${baseFontSize}px Arial`;
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    context.fillText('ENEMIES STATE', screen.x, screen.y);
+    context.fillText('GUEST', screen.x, screen.y);
 }
 
 
@@ -872,7 +873,7 @@ function calculateMarchTimes(city) {
 
 function markFlagArea(entity, areas, radiusSize = 3) {
     let centerX, centerY;
-    
+
     if (entity.width === 1 && entity.height === 1) {
         // For flags (1x1), use the entity position directly
         centerX = entity.x;
@@ -883,13 +884,13 @@ function markFlagArea(entity, areas, radiusSize = 3) {
         centerX = entity.x + Math.floor(entity.width / 2);
         centerY = entity.y + Math.floor(entity.height / 2);
     }
-    
+
     // For HQs, we want the specified radius OUTSIDE the building
     let effectiveRadius = radiusSize;
     if (entity.type === 'hq') {
         effectiveRadius = radiusSize + Math.floor(entity.width / 2);
     }
-    
+
     // Mark all fields within the effective radius
     for (let x = centerX - effectiveRadius; x <= centerX + effectiveRadius; x++) {
         for (let y = centerY - effectiveRadius; y <= centerY + effectiveRadius; y++) {
@@ -907,14 +908,14 @@ function isCityInProtectedArea(cityEntity, protectedAreas) {
         for (let dy = 0; dy < cityEntity.height; dy++) {
             const gridX = cityEntity.x + dx;
             const gridY = cityEntity.y + dy;
-            
+
             // If any cell of the city is NOT in a protected area (flag or HQ), the city is not well positioned
             if (!protectedAreas.has(`${gridX},${gridY}`)) {
                 return false;
             }
         }
     }
-    
+
     // All cells of the city are within protected areas
     return true;
 }
@@ -922,13 +923,13 @@ function isCityInProtectedArea(cityEntity, protectedAreas) {
 function drawFlagAreas(context, pX, pY, z, areas, color = 'rgba(173, 216, 230, 0.3)') {
     context.save();
     context.fillStyle = color;
-    
+
     areas.forEach(coord => {
         const [x, y] = coord.split(',').map(Number);
         const screen = diamondToScreen(x, y, pX, pY, z);
         const currentGridSize = baseGridSize * z;
         const fillSize = currentGridSize * 0.9;
-        
+
         context.beginPath();
         context.moveTo(screen.x, screen.y - fillSize * 0.5);
         context.lineTo(screen.x + fillSize * 0.5, screen.y);
@@ -937,7 +938,7 @@ function drawFlagAreas(context, pX, pY, z, areas, color = 'rgba(173, 216, 230, 0
         context.closePath();
         context.fill();
     });
-    
+
     context.restore();
 }
 
@@ -952,7 +953,7 @@ function getRandomColor() {
     do {
         const r = Math.floor(Math.random() * 128 + 127);
         const g = Math.floor(Math.random() * 128 + 127);
-        const b = Math.floor(Math.random() * 128 + 127); 
+        const b = Math.floor(Math.random() * 128 + 127);
         color = `rgb(${r}, ${g}, ${b})`;
     } while (isColorTooDark(color));
     return color;
@@ -961,7 +962,7 @@ function getRandomColor() {
 function isColorTooDark(color) {
     const rgb = color.match(/\d+/g).map(Number);
     const brightness = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
-    return brightness < 128; 
+    return brightness < 128;
 }
 
 function getWaveRing(city) {
@@ -1072,7 +1073,7 @@ function addEntity(event) {
     const rect = canvas.getBoundingClientRect();
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
-    
+
     const gridPos = screenToDiamond(mouseX, mouseY);
     const x = gridPos.x;
     const y = gridPos.y;
@@ -1111,13 +1112,13 @@ function addEntity(event) {
             alert('Enemy zones can only be placed in Castle mode.');
             return;
         }
-        if (enemyZones.length >= 3) {
-            alert('You can only place up to 3 Enemy Zones.');
-            return;
-        }
+        // if (enemyZones.length >= 5) {
+        //     alert('You can only place up to 5 Enemy Zones.');
+        //     return;
+        // }
         color = 'black';
-        width = 12;
-        height = 12;
+        width = 2;
+        height = 2;
     }
 
     const newEntityTemplate = isAllianceScopedType(selectedType)
@@ -1188,7 +1189,7 @@ function selectEntity(event) {
     const rect = canvas.getBoundingClientRect();
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
-    
+
     const gridPos = screenToDiamond(mouseX, mouseY);
 
     const clickedEntity = entities.find(entity => {
@@ -1209,24 +1210,24 @@ function selectEntity(event) {
 // Zoom and pan functionality
 function handleWheel(event) {
     event.preventDefault();
-    
+
     const rect = canvas.getBoundingClientRect();
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
-    
+
     const zoomFactor = event.deltaY > 0 ? 0.9 : 1.1;
     const newZoom = Math.max(0.1, Math.min(3, zoom * zoomFactor));
-    
+
     // Zoom towards mouse position
     const dx = mouseX - panX;
     const dy = mouseY - panY;
-    
+
     panX = mouseX - dx * (newZoom / zoom);
     panY = mouseY - dy * (newZoom / zoom);
-    
+
     zoom = newZoom;
     gridSize = baseGridSize * zoom;
-    
+
     redraw();
     updateZoomDisplay();
 }
@@ -1238,10 +1239,10 @@ function zoomIn() {
     const centerY = canvasHeight / 2;
     const dx = centerX - panX;
     const dy = centerY - panY;
-    
+
     panX = centerX - dx * (newZoom / zoom);
     panY = centerY - dy * (newZoom / zoom);
-    
+
     zoom = newZoom;
     gridSize = baseGridSize * zoom;
     redraw();
@@ -1254,10 +1255,10 @@ function zoomOut() {
     const centerY = canvasHeight / 2;
     const dx = centerX - panX;
     const dy = centerY - panY;
-    
+
     panX = centerX - dx * (newZoom / zoom);
     panY = centerY - dy * (newZoom / zoom);
-    
+
     zoom = newZoom;
     gridSize = baseGridSize * zoom;
     redraw();
@@ -1281,7 +1282,7 @@ function handleMouseDown(event) {
     const rect = canvas.getBoundingClientRect();
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
-    
+
     if (event.button === 1) { // Middle mouse button
         isPanning = true;
         lastMouseX = mouseX;
@@ -1310,7 +1311,7 @@ function handleMouseMove(event) {
     const rect = canvas.getBoundingClientRect();
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
-    
+
     if (isPanning) {
         panX += mouseX - lastMouseX;
         panY += mouseY - lastMouseY;
@@ -1321,7 +1322,7 @@ function handleMouseMove(event) {
         const gridPos = screenToDiamond(mouseX, mouseY);
         const newX = gridPos.x - dragOffsetX;
         const newY = gridPos.y - dragOffsetY;
-        
+
         if (isPositionValid(newX, newY, selectedEntity)) {
             selectedEntity.x = newX;
             selectedEntity.y = newY;
@@ -1360,11 +1361,11 @@ function handleToolbarClick(e) {
         selectedType = e.target.dataset.type;
         selectedEntity = null; // Deselect any entity when changing tools
         stopSelectionPulse();
-        
+
         // Remove highlighting from all buttons in both toolbars
         document.querySelectorAll('#toolbar-controls button, #toolbar-buildings button, #mobile-toolbar-buildings button').forEach(button => {
             button.classList.remove('bg-yellow-500', 'bg-yellow-600');
-            
+
             // Restore original colors for non-selected buttons
             if (button.dataset.type === e.target.dataset.type) {
                 button.classList.add('bg-yellow-500');
@@ -1377,12 +1378,12 @@ function handleToolbarClick(e) {
                 if (button.dataset.type === 'obstacle') button.classList.add('bg-blue-500');
             }
         });
-        
+
         if ((selectedType === 'select' || selectedType === 'move') && ghostPreview) {
             ghostPreview = null;
         }
         redraw(); // Redraw to remove selection highlight
-        
+
         // Update cursor style
         if (selectedType === 'move') {
             canvas.style.cursor = 'move';
@@ -1425,7 +1426,7 @@ function setCityLabelMode(mode = defaultCityLabelMode) {
 
 function setWaveMode(_waveMode = defaultWaveMode) {
     waveMode = _waveMode || defaultWaveMode;
-    
+
     const d2 = document.querySelector('[citySettingsButtons="2"]');
     const m2 = document.querySelector('[citySettingsButtons="m2"]');
     [d2, m2].forEach(b => {
@@ -1613,8 +1614,8 @@ function setAnchorInput(anchor) {
     if (anchor) {
         setCoordAnchor(anchor.x, anchor.y)
         const anchorInput = document.getElementById('anchorInput');
-        if (anchorInput) anchorInput.value = anchor.x + ':' + anchor.y; 
-    } 
+        if (anchorInput) anchorInput.value = anchor.x + ':' + anchor.y;
+    }
 }
 
 // initialize text field with default
@@ -1769,7 +1770,7 @@ window.addEventListener('DOMContentLoaded', () => {
     updateCityList();
     updateZoomDisplay();
     setCityLabelMode();
-    
+
     // Set up toolbar click handlers
     document.querySelectorAll('#toolbar-controls button, #toolbar-buildings button').forEach(button => {
         button.addEventListener('click', handleToolbarClick);
@@ -1796,7 +1797,7 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('zoomOutBtn')?.addEventListener('click', zoomOut);
     document.getElementById('resetZoomBtn')?.addEventListener('click', resetZoom);
     document.getElementById('centerBtn')?.addEventListener('click', centerMap);
-    
+
     // Sync map data between desktop and mobile textareas
     const mapDataInput = document.getElementById('mapData');
     const mobileMapData = document.getElementById('mobileMapData');
@@ -1868,7 +1869,7 @@ window.addEventListener('DOMContentLoaded', () => {
             handleSetAnchor();
         }
     });
-    
+
     // Copy short url (desktop)
     document.getElementById('copyShortUrlButton')?.addEventListener('click', () => {
         const out = document.getElementById('shortUrlOutput');
@@ -1879,7 +1880,7 @@ window.addEventListener('DOMContentLoaded', () => {
             }).catch(()=>{ /* ignore */ });
         }
     });
-    
+
     // Copy short url (mobile) - if mobile elements exist
     document.getElementById('mobileCopyShortUrlButton')?.addEventListener('click', () => {
         const out = document.getElementById('mobileShortUrlOutput');
@@ -1890,7 +1891,7 @@ window.addEventListener('DOMContentLoaded', () => {
             }).catch(()=>{ /* ignore */ });
         }
     });
-    
+
     // Add action button event listeners for both desktop and mobile
     ['', 'mobile'].forEach(prefix => {
         const p = prefix ? prefix + '-' : '';
@@ -1907,12 +1908,12 @@ window.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
-        
+
         document.getElementById(`${prefix}saveButton`)?.addEventListener('click', saveMap);
         document.getElementById(`${prefix}shareButton`)?.addEventListener('click', shareMap);
         document.getElementById(`${prefix}downloadButton`)?.addEventListener('click', downloadCanvasAsPNG);
     });
-    
+
     deleteButton.addEventListener('click', () => {
         if (selectedEntity) {
             deleteSelectedEntity();
@@ -1920,7 +1921,7 @@ window.addEventListener('DOMContentLoaded', () => {
             alert('No entity selected to delete.');
         }
     });
-    
+
     // Clear the entire map but preserve locked entities (e.g., castle/turrets)
     clearButton.addEventListener('click', () => {
         if (confirm('Are you sure you want to clear the entire map?')) {
@@ -1978,12 +1979,12 @@ window.addEventListener('DOMContentLoaded', () => {
             text = String.fromCharCode(...bytes);
             }
         }
-        
+
         importPlayerNamesCSV(text);
         csvInput.value = '';
         });
     }
-    
+
     // Add handlers for city settings buttons (P1 = clock toggle)
     document.querySelectorAll('[citySettingsButtons]').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -2046,10 +2047,10 @@ function saveMap() {
         const compressedMap = compressMapWithName(entities, mapName, coordAnchor, waveMode, cityLabelMode, mapMode);
         const mapDataInput = document.getElementById('mapData');
         const mobileMapData = document.getElementById('mobileMapData');
-        
+
         if (mapDataInput) mapDataInput.value = compressedMap;
         if (mobileMapData) mobileMapData.value = compressedMap;
-        
+
         const newUrl = new URL(window.location.href);
         newUrl.searchParams.set('mapData', compressedMap);
         replaceBrowserUrlSafely(newUrl);
@@ -2067,10 +2068,10 @@ function shareMap() {
         const compressedMap = compressMapWithName(entities, mapName, coordAnchor, waveMode, cityLabelMode, mapMode);
         const mapDataInput = document.getElementById('mapData');
         const mobileMapData = document.getElementById('mobileMapData');
-        
+
         if (mapDataInput) mapDataInput.value = compressedMap;
         if (mobileMapData) mobileMapData.value = compressedMap;
-        
+
         const longUrl = getShareableUrl(entities, mapName);
         replaceBrowserUrlSafely(longUrl);
 
@@ -2078,7 +2079,7 @@ function shareMap() {
             .then(() => {
                 const copyMessage = document.getElementById('copyMessage');
                 const mobileCopyMessage = document.getElementById('mobileCopyMessage');
-                
+
                 [copyMessage, mobileCopyMessage].forEach(msg => {
                     if (msg) {
                         msg.classList.remove('hidden');
@@ -2293,7 +2294,7 @@ function shareMap() {
 function updateZoomDisplay() {
     const zoomLevel = document.getElementById('zoomLevel');
     const zoomPercentage = Math.round(zoom * 100) + '%';
-    
+
     if (zoomLevel) {
         zoomLevel.textContent = zoomPercentage;
     }
@@ -2303,9 +2304,9 @@ function handleTouchStart(event) {
     event.preventDefault();
     isTouching = true;
     touchStartTime = Date.now();
-    
+
     const touches = event.touches;
-    
+
     if (touches.length === 1) {
         // Single touch
         const rect = canvas.getBoundingClientRect();
@@ -2313,7 +2314,7 @@ function handleTouchStart(event) {
         touchStartY = touches[0].clientY - rect.top;
         touchStartPanX = panX;
         touchStartPanY = panY;
-        
+
         if (selectedType === 'select') {
             selectEntity({ clientX: touches[0].clientX, clientY: touches[0].clientY });
             if (selectedEntity) {
@@ -2334,7 +2335,7 @@ function handleTouchStart(event) {
             Math.pow(touch2.clientY - touch1.clientY, 2)
         );
         initialZoom = zoom;
-        
+
         // Center point between fingers
         const rect = canvas.getBoundingClientRect();
         touchStartX = ((touch1.clientX + touch2.clientX) / 2) - rect.left;
@@ -2345,18 +2346,18 @@ function handleTouchStart(event) {
 function handleTouchMove(event) {
     event.preventDefault();
     const touches = event.touches;
-    
+
     if (touches.length === 1 && isTouching) {
         const rect = canvas.getBoundingClientRect();
         const currentX = touches[0].clientX - rect.left;
         const currentY = touches[0].clientY - rect.top;
-        
+
         if (isDragging && selectedEntity) {
             // Move selected entity
             const gridPos = screenToDiamond(currentX, currentY);
             const newX = gridPos.x - dragOffsetX;
             const newY = gridPos.y - dragOffsetY;
-            
+
             if (isPositionValid(newX, newY, selectedEntity)) {
                 selectedEntity.x = newX;
                 selectedEntity.y = newY;
@@ -2380,21 +2381,21 @@ function handleTouchMove(event) {
             Math.pow(touch2.clientX - touch1.clientX, 2) +
             Math.pow(touch2.clientY - touch1.clientY, 2)
         );
-        
+
         if (touchStartDistance > 0) {
             const zoomFactor = currentDistance / touchStartDistance;
             const newZoom = Math.max(0.1, Math.min(3, initialZoom * zoomFactor));
-            
+
             // Zoom towards the center point between fingers
             const dx = touchStartX - panX;
             const dy = touchStartY - panY;
-            
+
             panX = touchStartX - dx * (newZoom / zoom);
             panY = touchStartY - dy * (newZoom / zoom);
-            
+
             zoom = newZoom;
             gridSize = baseGridSize * zoom;
-            
+
             redraw();
             updateZoomDisplay();
         }
@@ -2404,10 +2405,10 @@ function handleTouchMove(event) {
 function handleTouchEnd(event) {
     event.preventDefault();
     const touchDuration = Date.now() - touchStartTime;
-    
+
     if (event.touches.length === 0) {
         isTouching = false;
-        
+
         // Check for tap (short touch duration and minimal movement)
         if (touchDuration < 300 && !isDragging && !isPanning) {
             const rect = canvas.getBoundingClientRect();
@@ -2415,12 +2416,12 @@ function handleTouchEnd(event) {
                 clientX: event.changedTouches[0].clientX,
                 clientY: event.changedTouches[0].clientY
             };
-            
+
             if (selectedType && selectedType !== 'select' && selectedType !== 'move') {
                 addEntity(tapEvent);
             }
         }
-        
+
         isDragging = false;
         isPanning = false;
         touchStartDistance = 0;
@@ -2440,8 +2441,8 @@ function updateGhostPreview(mouseX, mouseY) {
             width = 1;
             height = 1;
         } else if (selectedType === 'enemyzone') {
-            width = 12;
-            height = 12;
+            width = 2;
+            height = 2;
         } else if (selectedType === 'city') {
             width = 2;
             height = 2;
@@ -2465,7 +2466,7 @@ function updateGhostPreview(mouseX, mouseY) {
         } else {
             ghostPreview = null;
         }
-        
+
         redraw();
     }
 }
@@ -2490,7 +2491,7 @@ function isProtectedSourceInsideForeignProtectedArea(newX, newY, entity) {
 }
 
 function isPositionValid(newX, newY, entity) {
-    if (newX < -gridCols || newX + entity.width > gridCols + 1 || 
+    if (newX < -gridCols || newX + entity.width > gridCols + 1 ||
         newY < -gridRows || newY + entity.height > gridRows + 1) {
         return false;
     }
@@ -2554,7 +2555,7 @@ function isPositionValid(newX, newY, entity) {
     if (isProtectedSourceInsideForeignProtectedArea(newX, newY, entity)) {
         return false;
     }
-    
+
     for (let other of entities) {
         if (other !== entity) {
             const hasOverlap =
@@ -2590,11 +2591,20 @@ function handleKeyDown(event) {
         console.error('Error in undo/redo keyboard shortcut handler:', e);
     }
 
+    if (modKey && event.key && event.key.toLowerCase() === 'c') {
+        event.preventDefault();
+    }
+
+    if (modKey && event.key && event.key.toLowerCase() === 'v') {
+        event.preventDefault();
+    }
+
+
     if (!selectedEntity) return;
 
     if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key)) {
         event.preventDefault();
-    }    
+    }
 
     // City name editing
     if (selectedEntity.type === 'city' &&
@@ -2605,7 +2615,7 @@ function handleKeyDown(event) {
         } else if (event.key === 'Backspace') {
             event.preventDefault();
             selectedEntity.name = selectedEntity.name ? selectedEntity.name.slice(0, -1) : '';
-        } else if (event.key.length === 1) { 
+        } else if (event.key.length === 1) {
             if (!selectedEntity.isEditing) {
                 selectedEntity.name = '';
                 selectedEntity.isEditing = true;
@@ -2626,7 +2636,7 @@ function handleKeyDown(event) {
     // Movement with arrow keys
     let newX = selectedEntity.x;
     let newY = selectedEntity.y;
-    
+
     if (event.key === 'ArrowUp') {
         newY -= 1;
     } else if (event.key === 'ArrowDown') {
@@ -2636,7 +2646,7 @@ function handleKeyDown(event) {
     } else if (event.key === 'ArrowRight') {
         newX += 1;
     }
-    
+
     if (isPositionValid(newX, newY, selectedEntity)) {
         selectedEntity.x = newX;
         selectedEntity.y = newY;
@@ -2649,7 +2659,7 @@ function deleteSelectedEntity() {
     if (!selectedEntity) return;
     // Do not allow deleting locked entities (castle/turret)
     if (selectedEntity.locked) return;
-    
+
     const index = entities.indexOf(selectedEntity);
     if (index !== -1) {
         if (selectedEntity.type === 'city') {
@@ -2931,10 +2941,10 @@ function compressMap(entities) {
         }
 
         const type = entity.type === "flag" ? "000" :
-                    entity.type === "city" ? "001" : 
-                    entity.type === "building" ? "010" : 
-                    entity.type === "node" ? "011" : 
-                    entity.type === "hq" ? "101" : 
+                    entity.type === "city" ? "001" :
+                    entity.type === "building" ? "010" :
+                    entity.type === "node" ? "011" :
+                    entity.type === "hq" ? "101" :
                     entity.type === "enemyzone" ? "110" :
                     "100"; // obstacle
 
@@ -2983,7 +2993,7 @@ function decompressMap(base64) {
 
     // Auto-detect format: try to determine if this is legacy (22-bit) or new (23-bit) format
     const isLegacyFormat = detectLegacyFormat(binaryString);
-    
+
     if (isLegacyFormat) {
         return decompressLegacy(binaryString);
     } else {
@@ -2994,12 +3004,12 @@ function decompressMap(base64) {
 function detectLegacyFormat(binaryString) {
     // Check if the data length is more consistent with 22-bit chunks vs 23-bit chunks
     const totalBits = binaryString.length;
-    
+
     // Estimate how many entities we'd have with each format
     let entities22 = 0;
     let entities23 = 0;
     let i = 0;
-    
+
     // Try parsing as 22-bit chunks (legacy format)
     while (i + 22 <= totalBits) {
         const typeBits = binaryString.slice(i, i + 2);
@@ -3014,7 +3024,7 @@ function detectLegacyFormat(binaryString) {
         }
         entities22++;
     }
-    
+
     // Reset and try parsing as 23-bit chunks (new format)
     i = 0;
     while (i + 23 <= totalBits) {
@@ -3038,7 +3048,7 @@ function detectLegacyFormat(binaryString) {
         }
         entities23++;
     }
-    
+
     // If we found more valid entities with 22-bit parsing, it's probably legacy
     return entities22 > entities23;
 }
@@ -3056,9 +3066,9 @@ function decompressLegacy(binaryString) {
         i += 10;
 
         const type = typeBits === "00" ? "flag" :
-                     typeBits === "01" ? "city" : 
+                     typeBits === "01" ? "city" :
                      typeBits === "10" ? "building" : "node";
-        
+
         // Convert from old coordinate system (0-24) to new centered system (-12 to +12)
         const oldX = parseInt(xBits, 2);
         const oldY = parseInt(yBits, 2);
@@ -3188,8 +3198,8 @@ function decompressNew(binaryString) {
         entity.height = 3;
         entity.color = "darkgreen";
         } else if (type === "enemyzone") {
-        entity.width = 12;
-        entity.height = 12;
+        entity.width = 2;
+        entity.height = 2;
         entity.color = "black";
         } else if (type === "obstacle") {
         entity.width = 1;
@@ -3866,7 +3876,7 @@ function decompressMapWithName(combinedString) {
             if (!out.mapName) out.mapName = seg;
         }
     }
-    
+
     out.entities = decompressMap(base64String);
 
     if (out.mapName) {
@@ -4051,13 +4061,13 @@ function enablePopulateSortOptions(selected) {
             sel.appendChild(new Option('Team', 'team'));
         }
     });
-    
+
     // Check presence of BT1/BT2
     const allianceId = normalizeAllianceId(activeAllianceId);
     const cities = entities.filter(e => e.type === 'city' && getEntityAllianceId(e) === allianceId);
     const anyBT1 = cities.some(c => calculateMarchTimes(c).length >= 1);
     const anyBT2 = cities.some(c => calculateMarchTimes(c).length >= 2);
-    
+
     selects.forEach(sel => {
         if (anyBT1) sel.appendChild(new Option('BT1-Time', 'bt1'));
         if (anyBT2) sel.appendChild(new Option('BT2-Time', 'bt2'));
@@ -4109,7 +4119,7 @@ window.addEventListener('beforeunload', function(e) {
 });
 
 // ======= UTILS – Player import/export =======
-// This works for city names and their coordinates. 
+// This works for city names and their coordinates.
 // With a few changes we could export the entire building list
 
 // is "City 1/2/3 ..."?
@@ -4222,7 +4232,7 @@ function worldCoordToGrid(world, width=2, height=2){
 // 2) Only when no default cities remain, new 2x2 cities are created.
 // 3) Provided x,y are by default used ONLY for new cities.
 //    -> with option { moveDefaultCities:true } you can also move existing default cities,
-//       I used this for for testing, might not be the best idea for normal use 
+//       I used this for for testing, might not be the best idea for normal use
 function importPlayerNamesCSV(text, { moveDefaultCities = false } = {}){
   const lines = String(text).split(/\r?\n/).filter(l => l.trim().length);
   if (!lines.length) return;
@@ -4334,10 +4344,10 @@ function importPlayerNamesCSV(text, { moveDefaultCities = false } = {}){
     updateTeamsUI();
   }
 
-  try { redraw(); } catch(e) { console.error("Redraw failed:", e); }  
-  try { updateCounters(); } catch(e) { console.error("Update counters failed:", e); }  
-  try { updateCityList(); } catch(e) { console.error("Update city list failed:", e); }  
-  try { markUnsavedChanges(); } catch(e) { console.error("Marking unsaved changes failed:", e); } 
+  try { redraw(); } catch(e) { console.error("Redraw failed:", e); }
+  try { updateCounters(); } catch(e) { console.error("Update counters failed:", e); }
+  try { updateCityList(); } catch(e) { console.error("Update city list failed:", e); }
+  try { markUnsavedChanges(); } catch(e) { console.error("Marking unsaved changes failed:", e); }
 }
 
 
@@ -4624,7 +4634,7 @@ function exportPlayerNamesCSV({ onlyNamed = false } = {}) {
 
 
 // ===== HISTORY (UNDO/REDO) =====
-// Snapshot-based history 
+// Snapshot-based history
 const HISTORY_LIMIT = 200;
 let history = [];
 let historyIndex = -1; // points to current state in history

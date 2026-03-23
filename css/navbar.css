@@ -9,17 +9,20 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-        padding-top: 0;
+	padding-top: 0;
 	box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 	border-top-right-radius: 10px;
 	border-bottom-right-radius: 10px;
-	overflow-y: auto; /* Only vertical scrolling */
-	overflow-x: hidden; /* Prevents horizontal scrollbar */
+	overflow-y: auto;
+	/* Only vertical scrolling */
+	overflow-x: hidden;
+	/* Prevents horizontal scrollbar */
 	z-index: 1000;
 	padding-top: 0;
 }
+
 .wosnerds-navbar-container::-webkit-scrollbar {
-       width: 8px;
+	width: 8px;
 }
 
 .wosnerds-navbar-logo {
@@ -58,10 +61,12 @@
 
 /* Shift ALL content right to avoid overlap */
 body {
-	margin-left: 260px; /* Push all content over */
+	margin-left: 260px;
+	/* Push all content over */
 	padding: 20px;
 	box-sizing: border-box;
-	overflow-x: hidden; /* Prevents horizontal scrolling of body */
+	overflow-x: hidden;
+	/* Prevents horizontal scrolling of body */
 }
 
 /* Responsive fix for smaller screens */
@@ -74,20 +79,20 @@ body {
 		flex-direction: row;
 		justify-content: space-around;
 	}
-       .wosnerds-navbar-item {
-               display: inline-block;
-               margin: 0 5px;
-       }
 
-       .wosnerds-navbar-logo {
-               width: 100px;
-               height: auto;
-               display: inline-block;
-               margin: 10px;
-
-	body {
-		margin-left: 0;
-		width: 100%;
+	.wosnerds-navbar-item {
+		display: inline-block;
+		margin: 0 5px;
 	}
-}
 
+	.wosnerds-navbar-logo {
+		width: 100px;
+		height: auto;
+		display: inline-block;
+		margin: 10px;
+
+		body {
+			margin-left: 0;
+			width: 100%;
+		}
+	}

@@ -34,7 +34,8 @@ module.exports = {
     'bg-cyan-500', 'hover:bg-cyan-600', 'text-cyan-800',
     'bg-cyan-600', 'hover:bg-cyan-700',
     'bg-gray-500', 'hover:bg-gray-600', 'text-gray-800',
-    'bg-gray-600', 'hover:bg-gray-700',
+    'bg-gray-600', 'hover:bg-gray-700','bg-purple-600', 'hover:bg-purple-700',
+    'bg-zinc-200', 'hover:bg-zinc-300'
   ],
   plugins: [],
 }

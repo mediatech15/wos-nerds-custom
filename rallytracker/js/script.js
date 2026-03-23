@@ -1,4 +1,4 @@
-let rallyTimeMode = "minutes";
+let rallyTimeMode = "seconds";
 let marchTimes = [];
 let rallies = [];
 
@@ -59,13 +59,13 @@ function updatePlayerDropdown() {
 function renderMarchTimes() {
     let container = document.getElementById("march-times");
     container.innerHTML = "";
-    
+
     marchTimes.forEach((entry, index) => {
         let isInRally = rallies.some(r => r.name === entry.name);
 
         let div = document.createElement("div");
-        div.className = "march-entry";
-        
+        div.className = "march-entry transition-all duration-300 bg-zinc-200 hover:bg-zinc-300";
+
         // Improved mobile-friendly layout with more prominent buttons
         div.innerHTML = `
             <span class="font-medium text-base">${entry.name}: <span id="march-time-${index}" class="font-bold">${entry.time}s</span></span>
@@ -73,7 +73,7 @@ function renderMarchTimes() {
                 <button onclick="editMarchTime(${index})" class="bg-indigo-500 hover:bg-indigo-600 text-white text-xs px-3 py-1 rounded shadow-sm">Edit</button>
                 <button onclick="adjustMarchTime(${index}, 1)" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded shadow-sm">+1s</button>
                 <button onclick="adjustMarchTime(${index}, -1)" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded shadow-sm">-1s</button>
-                ${isInRally 
+                ${isInRally
                     ? `<button disabled class="bg-gray-400 cursor-not-allowed text-white text-xs px-3 py-1 rounded shadow-sm" title="Cannot delete: Used in a rally">Delete</button>`
                     : `<button onclick="deleteMarchTime(${index})" class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded shadow-sm">Delete</button>`}
             </div>`;
@@ -81,7 +81,6 @@ function renderMarchTimes() {
         container.appendChild(div);
     });
 }
-
 
 function editMarchTime(index) {
     let marchTimeSpan = document.getElementById(`march-time-${index}`);
@@ -137,25 +136,38 @@ function adjustMarchTime(index, amount) {
 }
 
 function addRally() {
-    let selectedPlayer = document.getElementById("rally-starter").value;
-    let player = marchTimes.find(p => p.name === selectedPlayer);
-    let rallyDuration = rallyTimeMode === "minutes"
+    let selectedPlayers = [...document.getElementById("rally-starter").options].filter(option => option.selected).map(option => option.value);
+    let rallyLaunchIn = rallyTimeMode === "minutes"
         ? parseInt(document.getElementById("new-rally-minutes").value) * 60 + parseInt(document.getElementById("new-rally-seconds").value)
         : parseInt(document.getElementById("new-rally-total-seconds").value);
 
-    if (player && !isNaN(rallyDuration)) {
-        rallies.push({
-            name: player.name,
-            marchTime: player.time,
-            launchTime: Date.now() + rallyDuration * 1000
-        });
-
-        renderRallies();
-        renderMarchTimes(); // Update delete button state
-        saveToCache();
+    for (let playerName of selectedPlayers) {
+        let player = marchTimes.find(p => p.name === playerName);
+        if (player && !isNaN(rallyLaunchIn)) {
+            rallies.push({
+                name: player.name,
+                marchTime: player.time,
+                launchTime: 0
+            });
+        }
     }
-}
+    rallies.sort((a, b) => (b.marchTime) - (a.marchTime)); // Sort by march time longest march first
+    rallies[0].launchTime = rallyLaunchIn; // First rally launches after the specified time
+    rallies.forEach((rally, idx) => {
+        rally.launchTime = idx === 0 ? rally.launchTime : rallies[idx - 1].launchTime + (rallies[idx - 1].marchTime - rally.marchTime);
 
+        console.log(`Rally ${rally.name} - March Time: ${rally.marchTime}s, Launch Time: ${rally.launchTime}s`);
+    });
+    rallies.sort((a, b) => (a.launchTime) - (b.launchTime)); // Sort by launch time
+    console.log("Rallies", rallies);
+    let currentTime = Date.now();
+    rallies.forEach(rally => {
+        rally.launchTime = currentTime + rally.launchTime * 1000;
+    });
+    renderRallies();
+    renderMarchTimes(); // Update delete button state
+    saveToCache();
+}
 
 function renderRallies() {
     let container = document.getElementById("rallies");
@@ -165,19 +177,21 @@ function renderRallies() {
 
     let soonestRallyIndex = -1;
     let soonestTime = Infinity;
+    let rallyLength = 5*60*1000; // 5 minutes in milliseconds
+    let currentTime = Date.now();
 
-    // Find the rally that will land next (ignoring landed ones)
+    // Find the rally that will launch next (ignoring launched ones)
     rallies.forEach((rally, index) => {
-        let remainingLandTime = rally.launchTime + rally.marchTime * 1000 - Date.now();
-        if (remainingLandTime > 0 && remainingLandTime < soonestTime) {
+        let remainingLaunchTime = rally.launchTime - currentTime;
+        if (remainingLaunchTime > 0 && remainingLaunchTime < soonestTime) {
             soonestRallyIndex = index;
-            soonestTime = remainingLandTime;
+            soonestTime = remainingLaunchTime;
         }
     });
 
     rallies.forEach((rally, index) => {
-        let remainingLaunchTime = Math.max(0, Math.floor((rally.launchTime - Date.now()) / 1000));
-        let remainingLandTime = Math.max(0, Math.floor((rally.launchTime + rally.marchTime * 1000 - Date.now()) / 1000));
+        let remainingLaunchTime = Math.max(0, Math.floor((rally.launchTime - currentTime) / 1000));
+        let remainingLandTime = Math.max(0, Math.floor((rally.launchTime + (rally.marchTime * 1000) + rallyLength - currentTime) / 1000));
 
         let launchMinutes = Math.floor(remainingLaunchTime / 60);
         let launchSeconds = remainingLaunchTime % 60;
@@ -185,13 +199,25 @@ function renderRallies() {
         let landSeconds = remainingLandTime % 60;
 
         let div = document.createElement("div");
-        div.className = "rally-entry";
+        div.className = "rally-entry transition-all duration-300 bg-zinc-200";
+
+        // console.log(remainingLaunchTime, index, soonestRallyIndex);
 
         // Background color based on rally status
         if (remainingLandTime <= 0) {
-            div.classList.add("bg-red-100"); // Landed
+            let className = "bg-red-300";
+            if (document.body.classList.contains("dark")) {
+                className = "bg-red-500";
+            }
+            div.classList.add(className); // Landed
+            div.classList.remove("bg-zinc-200");
         } else if (index === soonestRallyIndex) {
-            div.classList.add("bg-green-100"); // Next to land
+            let className = "bg-green-300";
+            if (document.body.classList.contains("dark")) {
+                className = "bg-green-700";
+            }
+            div.classList.add(className); // Next to land
+            div.classList.remove("bg-zinc-200");
         }
 
         // More mobile-friendly layout with launch and land on same line
@@ -200,11 +226,11 @@ function renderRallies() {
             <div class="flex justify-between gap-2">
                 <div class="text-sm">
                     <span class="font-medium">Launch:</span> ${launchMinutes}m ${launchSeconds}s
-                    <span class="text-xs text-gray-500">(${remainingLaunchTime}s)</span>
+                    <span class="text-xs">(${remainingLaunchTime}s)</span>
                 </div>
                 <div class="text-sm">
                     <span class="font-medium">Land:</span> ${landMinutes}m ${landSeconds}s
-                    <span class="text-xs text-gray-500">(${remainingLandTime}s)</span>
+                    <span class="text-xs">(${remainingLandTime}s)</span>
                 </div>
             </div>
             <div class="flex justify-between mt-2">
@@ -212,15 +238,13 @@ function renderRallies() {
                     <button onclick="adjustLaunch(${index}, -1)" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded">-1s</button>
                     <button onclick="adjustLaunch(${index}, 1)" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded">+1s</button>
                 </div>
-                <button onclick="deleteRally(${index})" class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded">Delete</button>
+                <button onclick="deleteRally(${index})" class="bg-red-900 hover:bg-red-600 text-white text-xs px-2 py-1 rounded">Delete</button>
             </div>
         `;
 
         container.appendChild(div);
     });
 }
-
-
 
 function adjustLaunch(index, amount) {
     rallies[index].launchTime += amount * 1000;
@@ -248,8 +272,8 @@ function updateRallyTimers() {
 function toggleRallyTimeMode() {
     rallyTimeMode = rallyTimeMode === "minutes" ? "seconds" : "minutes";
     document.getElementById("time-mode-min-sec").style.display = rallyTimeMode === "minutes" ? "flex" : "none";
-    document.getElementById("time-mode-seconds").style.display = rallyTimeMode === "seconds" ? "flex" : "none";
-    
+    document.getElementById("time-mode-seconds").style.display = rallyTimeMode === "seconds" ? "block" : "none";
+
     // Update the values when switching modes
     if (rallyTimeMode === "minutes") {
         let totalSeconds = parseInt(document.getElementById("new-rally-total-seconds").value);

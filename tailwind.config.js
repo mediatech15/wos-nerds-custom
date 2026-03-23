@@ -28,7 +28,8 @@ module.exports = {
     'bg-indigo-600', 'hover:bg-indigo-700',
     'bg-rose-600', 'hover:bg-rose-700',
     'bg-teal-700', 'hover:bg-teal-800',
-    'bg-zinc-700', 'hover:bg-zinc-800'
+    'bg-zinc-700', 'hover:bg-zinc-800',
+    'bg-purple-600', 'hover:bg-purple-700'
   ],
 
   plugins: [],
