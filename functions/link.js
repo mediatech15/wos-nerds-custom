@@ -1,3 +1,6 @@
 export function onRequestPost (context) {
-  return new Response('Hello, world!')
+  return new Response({
+    context: context,
+    msg: "Yo"
+  })
 }
