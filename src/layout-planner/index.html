@@ -7,7 +7,7 @@
         <meta property="og:title" content="Alliance Layout Planner">
         <meta property="og:description" content="Check out this Layout!">
         <meta property="og:url" content="https://wosnerds.com/layout-planner/index.html">
-        <link rel="stylesheet" href="/dist/css/tailwind.css?v=2">
+        <link rel="stylesheet" href="/css/built/tailwind.css?v=2">
         <link rel="stylesheet" href="/layout-planner/css/style.css">
         <link rel="stylesheet"
             href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
@@ -229,6 +229,7 @@
                 </div>
 
                 <!-- Bottom Section with Actions and Help -->
+
                 <!-- Actions Section -->
                 <div>
                     <button data-bottom="actions"
@@ -531,134 +532,134 @@
             // Initialize sections expanded
             document.addEventListener('DOMContentLoaded', () => {
                 ['buildings', 'cities'].forEach(section => {
-                    const content = document.getElementById(section + 'Section');
-                    const arrow = document.getElementById(section + 'Arrow');
-                    content.classList.remove('hidden');
-                    arrow.style.transform = '';
-                });
-            });
+                    const content = document.getElementById(section + 'Section')
+                    const arrow = document.getElementById(section + 'Arrow')
+                    content.classList.remove('hidden')
+                    arrow.style.transform = ''
+                })
+            })
 
             // Unified section toggle function
             function toggleSection(section) {
-                const content = document.getElementById(section + 'Section');
-                const arrow = document.getElementById(section + 'Arrow');
-                content.classList.toggle('hidden');
-                arrow.style.transform = content.classList.contains('hidden') ? 'rotate(180deg)' : '';
+                const content = document.getElementById(section + 'Section')
+                const arrow = document.getElementById(section + 'Arrow')
+                content.classList.toggle('hidden')
+                arrow.style.transform = content.classList.contains('hidden') ? 'rotate(180deg)' : ''
             }
 
             function toggleBottomSection(section) {
-                const content = document.getElementById(section + 'Section');
+                const content = document.getElementById(section + 'Section')
                 const arrow = document.getElementById(section + 'Arrow');
 
                 // Close other sections first
                 ['help', 'actions'].forEach(s => {
                     if (s !== section) {
-                        const otherContent = document.getElementById(s + 'Section');
-                        const otherArrow = document.getElementById(s + 'Arrow');
-                        otherContent.classList.add('hidden');
-                        otherArrow.style.transform = 'rotate(180deg)';
+                        const otherContent = document.getElementById(s + 'Section')
+                        const otherArrow = document.getElementById(s + 'Arrow')
+                        otherContent.classList.add('hidden')
+                        otherArrow.style.transform = 'rotate(180deg)'
                     }
-                });
+                })
 
-                content.classList.toggle('hidden');
-                arrow.style.transform = content.classList.contains('hidden') ? 'rotate(180deg)' : '';
+                content.classList.toggle('hidden')
+                arrow.style.transform = content.classList.contains('hidden') ? 'rotate(180deg)' : ''
             }
 
             // Add mobile panel toggle function
             function toggleMobileSection(section) {
-                const panels = document.querySelectorAll('.mobile-panel');
+                const panels = document.querySelectorAll('.mobile-panel')
                 panels.forEach(panel => {
                     if (panel.id === `mobile${section.charAt(0).toUpperCase() + section.slice(1)}`) {
-                        panel.style.display = 'block';
+                        panel.style.display = 'block'
                         // Use setTimeout to ensure display:block takes effect before adding active class
-                        setTimeout(() => panel.classList.toggle('active'), 10);
+                        setTimeout(() => panel.classList.toggle('active'), 10)
                     } else {
-                        panel.classList.remove('active');
+                        panel.classList.remove('active')
                         // Hide panel after transition
                         setTimeout(() => {
                             if (!panel.classList.contains('active')) {
-                                panel.style.display = 'none';
+                                panel.style.display = 'none'
                             }
-                        }, 300);
+                        }, 300)
                     }
-                });
+                })
             }
 
             // Update the sync toolbar buttons code
             document.addEventListener('DOMContentLoaded', () => {
-                const desktopToolbar = document.getElementById('toolbar-buildings');
-                const mobileToolbar = document.getElementById('mobile-toolbar-buildings');
+                const desktopToolbar = document.getElementById('toolbar-buildings')
+                const mobileToolbar = document.getElementById('mobile-toolbar-buildings')
 
                 // Clone desktop toolbar buttons to mobile toolbar
                 if (desktopToolbar && mobileToolbar) {
                     Array.from(desktopToolbar.children).forEach(button => {
-                        const clone = button.cloneNode(true);
-                        clone.addEventListener('click', handleToolbarClick);
-                        mobileToolbar.appendChild(clone);
-                    });
+                        const clone = button.cloneNode(true)
+                        clone.addEventListener('click', handleToolbarClick)
+                        mobileToolbar.appendChild(clone)
+                    })
                 }
 
                 // ---- Copy desktop Help content into mobile Help panel so we maintain one source ----
-                const desktopHelp = document.getElementById('helpSection');
-                const mobileHelpPanel = document.getElementById('mobileHelp');
+                const desktopHelp = document.getElementById('helpSection')
+                const mobileHelpPanel = document.getElementById('mobileHelp')
                 // mobileHelpPanel contains an inner .bg-white wrapper — replace its inner content
-                const mobileHelpWrapper = mobileHelpPanel?.querySelector('.bg-white');
+                const mobileHelpWrapper = mobileHelpPanel?.querySelector('.bg-white')
                 if (desktopHelp && mobileHelpWrapper) {
                     // keep mobile header and attach desktop help content
                     // Avoid using innerHTML with mixed content; clone nodes instead to prevent
                     // any accidental interpretation of HTML from the source node.
                     // Clear existing content
-                    while (mobileHelpWrapper.firstChild) mobileHelpWrapper.removeChild(mobileHelpWrapper.firstChild);
+                    while (mobileHelpWrapper.firstChild) mobileHelpWrapper.removeChild(mobileHelpWrapper.firstChild)
                     // Add header
-                    const h3 = document.createElement('h3');
-                    h3.className = 'font-medium mb-4';
-                    h3.textContent = 'Help';
-                    mobileHelpWrapper.appendChild(h3);
+                    const h3 = document.createElement('h3')
+                    h3.className = 'font-medium mb-4'
+                    h3.textContent = 'Help'
+                    mobileHelpWrapper.appendChild(h3)
                     // Clone the desktop help children (deep clone)
                     Array.from(desktopHelp.childNodes).forEach(node => {
-                        mobileHelpWrapper.appendChild(node.cloneNode(true));
-                    });
+                        mobileHelpWrapper.appendChild(node.cloneNode(true))
+                    })
                 }
 
                 // Show the marchtime hint only when Castle mode is selected
-                const marchtimeHint = document.getElementById('marchtimeHint');
-                const mobileMarchtimeHint = document.getElementById('mobileMarchtimeHint');
+                const marchtimeHint = document.getElementById('marchtimeHint')
+                const mobileMarchtimeHint = document.getElementById('mobileMarchtimeHint')
 
                 function resolveCurrentMode(preferredMode) {
-                    if (preferredMode === 'castle' || preferredMode === 'base') return preferredMode;
-                    const activeModeButton = document.querySelector('[data-mode][aria-pressed="true"]');
-                    if (activeModeButton?.dataset?.mode) return activeModeButton.dataset.mode;
-                    return 'base';
+                    if (preferredMode === 'castle' || preferredMode === 'base') return preferredMode
+                    const activeModeButton = document.querySelector('[data-mode][aria-pressed="true"]')
+                    if (activeModeButton?.dataset?.mode) return activeModeButton.dataset.mode
+                    return 'base'
                 }
 
                 function updateMarchtimeHint(modeOverride) {
-                    const mode = resolveCurrentMode(modeOverride);
+                    const mode = resolveCurrentMode(modeOverride)
                     if (mode === 'castle') {
-                        marchtimeHint.classList.remove('hidden');
-                        mobileMarchtimeHint?.classList.remove('hidden');
+                        marchtimeHint.classList.remove('hidden')
+                        mobileMarchtimeHint?.classList.remove('hidden')
                     } else {
-                        marchtimeHint.classList.add('hidden');
-                        mobileMarchtimeHint?.classList.add('hidden');
+                        marchtimeHint.classList.add('hidden')
+                        mobileMarchtimeHint?.classList.add('hidden')
                     }
                 }
-                updateMarchtimeHint();
+                updateMarchtimeHint()
                 document.querySelectorAll('[data-mode]').forEach(btn => {
-                    btn.addEventListener('click', () => updateMarchtimeHint(btn.dataset.mode));
-                });
+                    btn.addEventListener('click', () => updateMarchtimeHint(btn.dataset.mode))
+                })
                 window.addEventListener('layout-mapmode-change', (event) => {
-                    updateMarchtimeHint(event?.detail?.mode);
-                });
+                    updateMarchtimeHint(event?.detail?.mode)
+                })
 
                 // Event listeners declaratively
                 document.querySelectorAll('[data-section]').forEach(btn => {
-                    btn.addEventListener('click', () => toggleSection(btn.dataset.section));
-                });
+                    btn.addEventListener('click', () => toggleSection(btn.dataset.section))
+                })
                 document.querySelectorAll('[data-bottom]').forEach(btn => {
-                    btn.addEventListener('click', () => toggleBottomSection(btn.dataset.bottom));
-                });
+                    btn.addEventListener('click', () => toggleBottomSection(btn.dataset.bottom))
+                })
                 document.querySelectorAll('[data-mobile]').forEach(btn => {
-                    btn.addEventListener('click', () => toggleMobileSection(btn.dataset.mobile));
-                });
+                    btn.addEventListener('click', () => toggleMobileSection(btn.dataset.mobile))
+                })
             });
         </script>
 
