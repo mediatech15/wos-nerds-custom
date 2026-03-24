@@ -47,10 +47,9 @@ export async function onRequestPost (context) {
 
   if (link.ok) {
     const linkData = await link.json()
-    const jsonData = JSON.parse(linkData)
     return Response.json({
-      link: jsonData.shorturl,
-      message: jsonData.message
+      link: linkData.shorturl,
+      message: linkData.message
     })
   }
 
