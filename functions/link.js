@@ -7,7 +7,7 @@ export async function onRequestPost (context) {
   }
   const headers = {}
   for (const k of context.request.headers.keys()){
-    h[k] = context.request.headers.get(k)
+    headers[k] = context.request.headers.get(k)
   }
   if (headers.origin !== 'https://wos-tools.fidgetcode.dev') {
     return new Response('Forbidden', {status: 403})
