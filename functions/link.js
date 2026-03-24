@@ -3,7 +3,7 @@ export async function onRequestPost (context) {
   return Response.json({
     context: context,
     url: context.request.url,
-    headers: context.request.headers.entries(),
+    cf: context.request.cf,
     request: x,
     msg: "Yo"
   }, {
