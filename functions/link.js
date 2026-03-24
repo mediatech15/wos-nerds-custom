@@ -5,6 +5,8 @@ export function onRequestPost (context) {
   }), {
     status: 200,
     statusText: 'OK',
-    headers: new Headers().append('Content-Type', 'application/json')
+    headers: new Headers({
+      'Content-Type': 'application/json'
+    })
   })
 }
