@@ -1,5 +1,5 @@
 export function onRequestPost (context) {
-  return new Response.json({
+  return Response.json({
     context: context,
     msg: "Yo"
   }, {
