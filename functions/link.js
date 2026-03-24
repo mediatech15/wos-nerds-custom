@@ -1,12 +1,9 @@
 export function onRequestPost (context) {
-  return new Response(JSON.stringify({
+  return new Response.json({
     context: context,
     msg: "Yo"
-  }), {
+  }, {
     status: 200,
     statusText: 'OK',
-    headers: new Headers({
-      'Content-Type': 'application/json'
-    })
   })
 }
