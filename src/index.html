@@ -114,7 +114,8 @@
           signal: controller.signal
         })
         clearTimeout(timeout)
-        if (!resp.ok) throw new Error(`Shortener API error ${resp.status}`)
+        const c = await resp.text()
+        if (!resp.ok) throw new Error(`Shortener API error ${resp.status}, ${c}`)
         let text = await resp.json()
         console.log(text)
       })()
