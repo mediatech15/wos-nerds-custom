@@ -1,21 +1,21 @@
 // ===== DOM ELEMENTS =====
 const canvas = document.getElementById('layoutCanvas')
 const ctx = canvas.getContext('2d')
-// const toolbar = document.getElementById('toolbar')
+const toolbar = document.getElementById('toolbar')
 const flagCounter = document.getElementById('flagCounter')
 const cityCounter = document.getElementById('cityCounter')
 const buildingCounter = document.getElementById('buildingCounter')
 const hqCounter = document.getElementById('hqCounter')
 const nodeCounter = document.getElementById('nodeCounter')
-// const saveButton = document.getElementById('saveButton')
-// const loadButton = document.getElementById('loadButton')
+const saveButton = document.getElementById('saveButton')
+const loadButton = document.getElementById('loadButton')
 const mapData = document.getElementById('mapData')
-// const copyMessage = document.getElementById('copyMessage')
-// const shortUrlButton = document.getElementById('shortUrlButton')
-// const copyShortUrlButton = document.getElementById('copyShortUrlButton')
-// const shortUrlContainer = document.getElementById('shortUrlContainer')
-// const shortUrlOutput = document.getElementById('shortUrlOutput')
-// const shortUrlError = document.getElementById('shortUrlError')
+const copyMessage = document.getElementById('copyMessage')
+const shortUrlButton = document.getElementById('shortUrlButton')
+const copyShortUrlButton = document.getElementById('copyShortUrlButton')
+const shortUrlContainer = document.getElementById('shortUrlContainer')
+const shortUrlOutput = document.getElementById('shortUrlOutput')
+const shortUrlError = document.getElementById('shortUrlError')
 const deleteButton = document.getElementById('deleteButton')
 const clearButton = document.getElementById('clearButton')
 
@@ -177,14 +177,14 @@ const wavePalette = [
 ]
 
 // ===== TOUCH/MOBILE SUPPORT =====
-// const touchStartDistance = 0
-// const initialZoom = 1
-// const touchStartX = 0
-// const touchStartY = 0
-// const touchStartPanX = 0
-// const touchStartPanY = 0
-// const isTouching = false
-// const touchStartTime = 0
+const touchStartDistance = 0
+const initialZoom = 1
+const touchStartX = 0
+const touchStartY = 0
+const touchStartPanX = 0
+const touchStartPanY = 0
+const isTouching = false
+const touchStartTime = 0
 
 // ===== CANVAS MANAGEMENT =====
 // Initialize canvas size
@@ -2291,133 +2291,133 @@ function updateZoomDisplay () {
   }
 }
 
-// function handleTouchStart (event) {
-//   event.preventDefault()
-//   isTouching = true
-//   touchStartTime = Date.now()
+function handleTouchStart (event) {
+  event.preventDefault()
+  isTouching = true
+  touchStartTime = Date.now()
 
-//   const touches = event.touches
+  const touches = event.touches
 
-//   if (touches.length === 1) {
-//     // Single touch
-//     const rect = canvas.getBoundingClientRect()
-//     touchStartX = touches[0].clientX - rect.left
-//     touchStartY = touches[0].clientY - rect.top
-//     touchStartPanX = panX
-//     touchStartPanY = panY
+  if (touches.length === 1) {
+    // Single touch
+    const rect = canvas.getBoundingClientRect()
+    touchStartX = touches[0].clientX - rect.left
+    touchStartY = touches[0].clientY - rect.top
+    touchStartPanX = panX
+    touchStartPanY = panY
 
-//     if (selectedType === 'select') {
-//       selectEntity({ clientX: touches[0].clientX, clientY: touches[0].clientY })
-//       if (selectedEntity) {
-//         isDragging = true
-//         const gridPos = screenToDiamond(touchStartX, touchStartY)
-//         dragOffsetX = gridPos.x - selectedEntity.x
-//         dragOffsetY = gridPos.y - selectedEntity.y
-//       }
-//     } else if (selectedType === 'move') {
-//       isPanning = true
-//     }
-//   } else if (touches.length === 2) {
-//     // Two finger touch for pinch zoom
-//     const touch1 = touches[0]
-//     const touch2 = touches[1]
-//     touchStartDistance = Math.sqrt(
-//       Math.pow(touch2.clientX - touch1.clientX, 2) +
-//             Math.pow(touch2.clientY - touch1.clientY, 2)
-//     )
-//     initialZoom = zoom
+    if (selectedType === 'select') {
+      selectEntity({ clientX: touches[0].clientX, clientY: touches[0].clientY })
+      if (selectedEntity) {
+        isDragging = true
+        const gridPos = screenToDiamond(touchStartX, touchStartY)
+        dragOffsetX = gridPos.x - selectedEntity.x
+        dragOffsetY = gridPos.y - selectedEntity.y
+      }
+    } else if (selectedType === 'move') {
+      isPanning = true
+    }
+  } else if (touches.length === 2) {
+    // Two finger touch for pinch zoom
+    const touch1 = touches[0]
+    const touch2 = touches[1]
+    touchStartDistance = Math.sqrt(
+      Math.pow(touch2.clientX - touch1.clientX, 2) +
+            Math.pow(touch2.clientY - touch1.clientY, 2)
+    )
+    initialZoom = zoom
 
-//     // Center point between fingers
-//     const rect = canvas.getBoundingClientRect()
-//     touchStartX = ((touch1.clientX + touch2.clientX) / 2) - rect.left
-//     touchStartY = ((touch1.clientY + touch2.clientY) / 2) - rect.top
-//   }
-// }
+    // Center point between fingers
+    const rect = canvas.getBoundingClientRect()
+    touchStartX = ((touch1.clientX + touch2.clientX) / 2) - rect.left
+    touchStartY = ((touch1.clientY + touch2.clientY) / 2) - rect.top
+  }
+}
 
-// function handleTouchMove (event) {
-//   event.preventDefault()
-//   const touches = event.touches
+function handleTouchMove (event) {
+  event.preventDefault()
+  const touches = event.touches
 
-//   if (touches.length === 1 && isTouching) {
-//     const rect = canvas.getBoundingClientRect()
-//     const currentX = touches[0].clientX - rect.left
-//     const currentY = touches[0].clientY - rect.top
+  if (touches.length === 1 && isTouching) {
+    const rect = canvas.getBoundingClientRect()
+    const currentX = touches[0].clientX - rect.left
+    const currentY = touches[0].clientY - rect.top
 
-//     if (isDragging && selectedEntity) {
-//       // Move selected entity
-//       const gridPos = screenToDiamond(currentX, currentY)
-//       const newX = gridPos.x - dragOffsetX
-//       const newY = gridPos.y - dragOffsetY
+    if (isDragging && selectedEntity) {
+      // Move selected entity
+      const gridPos = screenToDiamond(currentX, currentY)
+      const newX = gridPos.x - dragOffsetX
+      const newY = gridPos.y - dragOffsetY
 
-//       if (isPositionValid(newX, newY, selectedEntity)) {
-//         selectedEntity.x = newX
-//         selectedEntity.y = newY
-//         redraw()
-//         markUnsavedChanges()
-//       }
-//     } else if (isPanning || selectedType === 'move') {
-//       // Pan the map
-//       panX = touchStartPanX + (currentX - touchStartX)
-//       panY = touchStartPanY + (currentY - touchStartY)
-//       redraw()
-//     } else if (selectedType && selectedType !== 'select' && selectedType !== 'move') {
-//       // Update ghost preview
-//       updateGhostPreview(currentX, currentY)
-//     }
-//   } else if (touches.length === 2) {
-//     // Pinch zoom
-//     const touch1 = touches[0]
-//     const touch2 = touches[1]
-//     const currentDistance = Math.sqrt(
-//       Math.pow(touch2.clientX - touch1.clientX, 2) +
-//             Math.pow(touch2.clientY - touch1.clientY, 2)
-//     )
+      if (isPositionValid(newX, newY, selectedEntity)) {
+        selectedEntity.x = newX
+        selectedEntity.y = newY
+        redraw()
+        markUnsavedChanges()
+      }
+    } else if (isPanning || selectedType === 'move') {
+      // Pan the map
+      panX = touchStartPanX + (currentX - touchStartX)
+      panY = touchStartPanY + (currentY - touchStartY)
+      redraw()
+    } else if (selectedType && selectedType !== 'select' && selectedType !== 'move') {
+      // Update ghost preview
+      updateGhostPreview(currentX, currentY)
+    }
+  } else if (touches.length === 2) {
+    // Pinch zoom
+    const touch1 = touches[0]
+    const touch2 = touches[1]
+    const currentDistance = Math.sqrt(
+      Math.pow(touch2.clientX - touch1.clientX, 2) +
+            Math.pow(touch2.clientY - touch1.clientY, 2)
+    )
 
-//     if (touchStartDistance > 0) {
-//       const zoomFactor = currentDistance / touchStartDistance
-//       const newZoom = Math.max(0.1, Math.min(3, initialZoom * zoomFactor))
+    if (touchStartDistance > 0) {
+      const zoomFactor = currentDistance / touchStartDistance
+      const newZoom = Math.max(0.1, Math.min(3, initialZoom * zoomFactor))
 
-//       // Zoom towards the center point between fingers
-//       const dx = touchStartX - panX
-//       const dy = touchStartY - panY
+      // Zoom towards the center point between fingers
+      const dx = touchStartX - panX
+      const dy = touchStartY - panY
 
-//       panX = touchStartX - dx * (newZoom / zoom)
-//       panY = touchStartY - dy * (newZoom / zoom)
+      panX = touchStartX - dx * (newZoom / zoom)
+      panY = touchStartY - dy * (newZoom / zoom)
 
-//       zoom = newZoom
-//       gridSize = baseGridSize * zoom
+      zoom = newZoom
+      gridSize = baseGridSize * zoom
 
-//       redraw()
-//       updateZoomDisplay()
-//     }
-//   }
-// }
+      redraw()
+      updateZoomDisplay()
+    }
+  }
+}
 
-// function handleTouchEnd (event) {
-//   event.preventDefault()
-//   const touchDuration = Date.now() - touchStartTime
+function handleTouchEnd (event) {
+  event.preventDefault()
+  const touchDuration = Date.now() - touchStartTime
 
-//   if (event.touches.length === 0) {
-//     isTouching = false
+  if (event.touches.length === 0) {
+    isTouching = false
 
-//     // Check for tap (short touch duration and minimal movement)
-//     if (touchDuration < 300 && !isDragging && !isPanning) {
-//       const rect = canvas.getBoundingClientRect()
-//       const tapEvent = {
-//         clientX: event.changedTouches[0].clientX,
-//         clientY: event.changedTouches[0].clientY
-//       }
+    // Check for tap (short touch duration and minimal movement)
+    if (touchDuration < 300 && !isDragging && !isPanning) {
+      const rect = canvas.getBoundingClientRect()
+      const tapEvent = {
+        clientX: event.changedTouches[0].clientX,
+        clientY: event.changedTouches[0].clientY
+      }
 
-//       if (selectedType && selectedType !== 'select' && selectedType !== 'move') {
-//         addEntity(tapEvent)
-//       }
-//     }
+      if (selectedType && selectedType !== 'select' && selectedType !== 'move') {
+        addEntity(tapEvent)
+      }
+    }
 
-//     isDragging = false
-//     isPanning = false
-//     touchStartDistance = 0
-//   }
-// }
+    isDragging = false
+    isPanning = false
+    touchStartDistance = 0
+  }
+}
 
 function updateGhostPreview (mouseX, mouseY) {
   territoryPreview = null
@@ -2875,13 +2875,13 @@ function renumberCities () {
 // ===== DATA PERSISTENCE =====
 
 // Helper
-// function needsUtf8 (str) {
-//   if (str.length > 254) return true
-//   for (const ch of str) {
-//     if (ch.codePointAt(0) > 0xFF) return true
-//   }
-//   return false
-// }
+function needsUtf8 (str) {
+  if (str.length > 254) return true
+  for (const ch of str) {
+    if (ch.codePointAt(0) > 0xFF) return true
+  }
+  return false
+}
 
 // Checks if we can read bitCount bits from bitstr starting at offset
 function canReadBits (bitstr, offset, bitCount) {
@@ -2909,16 +2909,16 @@ function readBytesFromBitString (bitstr, offset, byteCount) {
 
 const _utf8Decoder = new TextDecoder('utf-8') // reuse for efficiency
 
-// function bytesToBitString (bytes) {
-//   let s = ''
-//   for (let i = 0; i < bytes.length; i++) s += bytes[i].toString(2).padStart(8, '0')
-//   return s
-// }
+function bytesToBitString (bytes) {
+  let s = ''
+  for (let i = 0; i < bytes.length; i++) s += bytes[i].toString(2).padStart(8, '0')
+  return s
+}
 
-// function readBitsAsInt (bits, offset, len) {
-//   if (offset + len > bits.length) return null
-//   return parseInt(bits.slice(offset, offset + len), 2)
-// }
+function readBitsAsInt (bits, offset, len) {
+  if (offset + len > bits.length) return null
+  return parseInt(bits.slice(offset, offset + len), 2)
+}
 
 // Compression and decompression functions
 function compressMap (entities) {
