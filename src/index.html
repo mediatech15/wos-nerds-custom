@@ -102,20 +102,22 @@
     <script src="/js/navbar.js"></script>
     <script src="/js/darkmode.js"></script>
     <script>
-      const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), 10000)
-      const resp = await fetch('https://wos-tools.fidgetcode.dev/link', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ msg: 'asdf' }),
-        signal: controller.signal
-      })
-      clearTimeout(timeout)
-      if (!resp.ok) throw new Error(`Shortener API error ${resp.status}`)
-      let text = await resp.json()
-      console.log(text)
+      (async () => {
+        const controller = new AbortController()
+        const timeout = setTimeout(() => controller.abort(), 10000)
+        const resp = await fetch('https://wos-tools.fidgetcode.dev/link', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ msg: 'asdf' }),
+          signal: controller.signal
+        })
+        clearTimeout(timeout)
+        if (!resp.ok) throw new Error(`Shortener API error ${resp.status}`)
+        let text = await resp.json()
+        console.log(text)
+      })()
     </script>
   </body>
 
