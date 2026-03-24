@@ -37,6 +37,9 @@ export async function onRequestPost (context) {
   }).toString()
   const link = await fetch('https://micro.pink/yourls-api.php', {
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
     body: reqBody,
     signal: controller.signal
   })
@@ -51,5 +54,6 @@ export async function onRequestPost (context) {
     })
   }
 
-  return new Response('error creating short link', {status: 400})
+  const err = await link.text()
+  return new Response('error creating short link', {status: 400, statusText: err})
 }
