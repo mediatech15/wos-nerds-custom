@@ -2301,10 +2301,13 @@ const SHORT_URL_GENERATING_TEXT = 'Generating...';
         })
         clearTimeout(timeout)
         const imageData = await resp.json()
-        console.log(imageData)
         if (!resp.ok) {
           throw new Error(`Shortener API error ${resp.status}`)
         }
+        const url = imageData.image.url
+        if (shortUrlOutput) shortUrlOutput.value = url
+        if (mobileShortUrlOutput) mobileShortUrlOutput.value = url
+        markChangesSaved()
       } catch (err) {
         console.warn('Image URL failed', err)
       }
