@@ -6,6 +6,7 @@
     "build:css": "npx tailwindcss -i ./src/css/tailwind.css -o ./src/css/built/tailwind.css",
     "watch:css": "npx tailwindcss -i ./src/css/tailwind.css -o ./src/css/built/tailwind.css --watch",
     "build": "npm run build:css & parcel build --no-source-maps",
+    "build:ci": "npm install --include-dev && npm run build:css & parcel build --no-source-maps",
     "serve": "parcel serve -p 5500 --host localhost --watch-dir src --no-cors",
     "build:browserslist": "npx update-browserslist-db@latest"
   },
@@ -16,10 +17,6 @@
     "parcel-reporter-static-files-copy": "^1.5.3",
     "standard": "^17.1.2",
     "tailwindcss": "^3.4.17"
-  },
-  "optionalDependencies": {
-    "@parcel/watcher-linux-x64-glibc": "2.2.0",
-    "lightningcss-linux-x64-gnu": "1.21.5"
   },
   "keywords": [],
   "author": "",
