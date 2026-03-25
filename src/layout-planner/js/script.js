@@ -2150,10 +2150,10 @@ const SHORT_URL_GENERATING_TEXT = 'Generating...';
         signal: controller.signal
       })
       clearTimeout(timeout)
+      const data = await resp.json()
       if (!resp.ok) {
         throw new Error(`Shortener API error ${resp.status}`)
       }
-      const data = await resp.json()
 
       // set both outputs
       if (shortUrlOutput) shortUrlOutput.value = data.link

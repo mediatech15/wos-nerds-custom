@@ -1,29 +1,29 @@
 export async function onRequestPost (context) {
   let body
-  try{
+  try {
     body = await context.request.json()
   } catch {
-    return new Response('Error getting body', {status: 400})
+    return new Response('Error getting body', { status: 400 })
   }
   const headers = {}
-  for (const k of context.request.headers.keys()){
+  for (const k of context.request.headers.keys()) {
     headers[k] = context.request.headers.get(k)
   }
   if (headers.origin !== 'https://wos-tools.fidgetcode.dev') {
-    return new Response('Forbidden', {status: 403})
+    return new Response('Forbidden', { status: 403 })
   }
-  if (headers.referer !== 'https://wos-tools.fidgetcode.dev/') {
-    return new Response('Forbidden', {status: 403})
+  if (!headers.referer.startsWith('https://wos-tools.fidgetcode.dev/')) {
+    return new Response('Forbidden', { status: 403 })
   }
   if (headers['sec-fetch-site'] !== 'same-origin') {
-    return new Response('Forbidden', {status: 403})
+    return new Response('Forbidden', { status: 403 })
   }
 
   if (body.url === undefined) {
-    return new Response('url must be defined in body', {status: 400})
+    return new Response('url must be defined in body', { status: 400 })
   }
   if (body.id === undefined) {
-    return new Response('id must be defined in body', {status: 400})
+    return new Response('id must be defined in body', { status: 400 })
   }
 
   const controller = new AbortController()
@@ -54,5 +54,5 @@ export async function onRequestPost (context) {
   }
 
   const err = await link.text()
-  return new Response('error creating short link', {status: 400, statusText: err})
+  return new Response('error creating short link', { status: 400, statusText: err })
 }
