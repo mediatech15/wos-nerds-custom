@@ -45,16 +45,16 @@ The site uses a template system for consistent layout across all tools:
 
 1. Each tool folder can use the template by including the template helper:
 ```html
-<script src="/js/template-helper.js"></script>
+<script src="./js/template-helper.js"></script>
 <script>
   applyTemplate('Tool Name', {
     beforeContent: function() {
       // Add custom CSS
-      addStylesheet('/toolname/css/style.css');
+      addStylesheet('./toolname/css/style.css');
     },
     afterContent: function() {
       // Add custom JS
-      addScript('/toolname/js/script.js');
+      addScript('./toolname/js/script.js');
     }
   });
 </script>

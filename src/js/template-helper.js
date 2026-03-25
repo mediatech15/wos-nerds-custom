@@ -6,7 +6,7 @@
  * 2. Call applyTemplate() with the page title and optional callbacks
  *
  * Example:
- * <script src="/js/template-helper.js"></script>
+ * <script src="./js/template-helper.js"></script>
  * <script>
  *   applyTemplate('Research Calculator', {
  *     beforeContent: function() {

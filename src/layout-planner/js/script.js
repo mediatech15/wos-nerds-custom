@@ -533,7 +533,7 @@ function drawEntity (context, pX, pY, z, entity, protectedAreasByAlliance) {
     context.lineWidth = Math.max(1, 2 * z)
   } else if (entity.type === 'city' && mapMode !== 'castle' && !isCityInProtectedArea(entity, cityProtectedAreas)) {
     context.strokeStyle = 'rgba(255, 0, 0, 1.0)'
-    context.lineWidth = Math.max(2, 4 * z)
+    context.lineWidth = Math.max(1, 2 * z)
   } else {
     context.strokeStyle = 'rgba(0, 0, 0, 0.9)'
     context.lineWidth = Math.max(1, 2 * z)
@@ -573,7 +573,7 @@ function drawEntity (context, pX, pY, z, entity, protectedAreasByAlliance) {
     // draw castle label
     context.fillStyle = 'white'
     const currentGridSize = baseGridSize * z
-    const baseFontSize = Math.max(10, Math.min(24, currentGridSize * 0.25))
+    const baseFontSize = Math.max(10, Math.min(32, currentGridSize * 0.25))
     context.font = `${baseFontSize}px Arial`
     context.textAlign = 'center'
     context.textBaseline = 'middle'
@@ -581,7 +581,7 @@ function drawEntity (context, pX, pY, z, entity, protectedAreasByAlliance) {
   } else if (entity.type === 'turret') {
     context.fillStyle = 'white'
     const currentGridSize = baseGridSize * z
-    const baseFontSize = Math.max(8, Math.min(18, currentGridSize * 0.2))
+    const baseFontSize = Math.max(8, Math.min(32, currentGridSize * 0.25))
     context.font = `${baseFontSize}px Arial`
     context.textAlign = 'center'
     context.textBaseline = 'middle'
@@ -657,7 +657,7 @@ function drawCityDetails (context, z, city, screen) {
 
   // Scale font size, with minimum and maximum limits
   const currentGridSize = baseGridSize * z
-  const baseFontSize = Math.max(6, Math.min(16, currentGridSize * 0.25))
+  const baseFontSize = Math.max(6, Math.min(32, currentGridSize * 0.25))
   context.font = `${baseFontSize}px Arial`
   context.textAlign = 'center'
   context.textBaseline = 'middle'
@@ -688,7 +688,7 @@ function drawCityDetails (context, z, city, screen) {
   // ---- Show city coordinates relative to anchor ----
   if (cityLabelMode === 'coords') {
     const c = coordForCity(city)
-    const fs = Math.max(6, Math.min(14, baseGridSize * z * 0.22))
+    const fs = Math.max(6, Math.min(32, baseGridSize * z * 0.2))
     context.font = `${fs}px Arial`
     context.textAlign = 'center'
     context.textBaseline = 'top'
@@ -701,7 +701,7 @@ function drawBearTrapDetails (context, z, trap, screen) {
   context.fillStyle = 'white'
 
   const currentGridSize = baseGridSize * z
-  const baseFontSize = Math.max(8, Math.min(20, currentGridSize * 0.3))
+  const baseFontSize = Math.max(8, Math.min(32, currentGridSize * 0.3))
   context.font = `${baseFontSize}px Arial`
   context.textAlign = 'center'
   context.textBaseline = 'middle'
@@ -715,7 +715,7 @@ function drawHQDetails (context, z, hq, screen) {
   context.fillStyle = 'white'
 
   const currentGridSize = baseGridSize * z
-  const baseFontSize = Math.max(8, Math.min(20, currentGridSize * 0.3))
+  const baseFontSize = Math.max(8, Math.min(32, currentGridSize * 0.3))
   context.font = `${baseFontSize}px Arial`
   context.textAlign = 'center'
   context.textBaseline = 'middle'
@@ -727,7 +727,7 @@ function drawNodeDetails (context, z, node, screen) {
   context.fillStyle = 'white'
 
   const currentGridSize = baseGridSize * z
-  const baseFontSize = Math.max(6, Math.min(18, currentGridSize * 0.25))
+  const baseFontSize = Math.max(6, Math.min(32, currentGridSize * 0.25))
   context.font = `${baseFontSize}px Arial`
   context.textAlign = 'center'
   context.textBaseline = 'middle'
@@ -749,7 +749,7 @@ function drawObstacleDetails (context, z, obstacle, screen) {
 function drawEnemyZoneDetails (context, z, zone, screen) {
   context.fillStyle = 'white'
   const currentGridSize = baseGridSize * z
-  const baseFontSize = Math.max(10, Math.min(24, currentGridSize * 0.25))
+  const baseFontSize = Math.max(10, Math.min(32, currentGridSize * 0.25))
   context.font = `${baseFontSize}px Arial`
   context.textAlign = 'center'
   context.textBaseline = 'middle'
@@ -1808,6 +1808,10 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('createNewTeamBtn')?.addEventListener('click', createNewTeam)
   document.getElementById('createNewTeamBtnMobile')?.addEventListener('click', createNewTeam)
   document.getElementById('saveAsCSVButton')?.addEventListener('click', () => exportPlayerNamesCSV({ onlyNamed: false }))
+  document.getElementById('shortRandomTagButton')?.addEventListener('click', () => {
+    document.getElementById('shortUrlKeyword').value = generateRandomShortTag()
+  })
+  document.getElementById('unsavedChangesPill')?.addEventListener('click', saveMap)
 
   // Team modal wiring
   const teamModal = document.getElementById('teamModal')
@@ -1928,6 +1932,18 @@ window.addEventListener('DOMContentLoaded', () => {
       selectedEntity = null
       stopSelectionPulse()
 
+      const shortUrlKeyword = document.getElementById('shortUrlKeyword')
+      if (shortUrlKeyword) {
+        shortUrlKeyword.value = ''
+      }
+      if (mapData) {
+        mapData.value = ''
+      }
+      const newUrl = new URL(window.location.href)
+      newUrl.searchParams.delete('mapData')
+      newUrl.searchParams.delete('key')
+      replaceBrowserUrlSafely(newUrl)
+
       redraw()
       updateCounters()
       updateCityList()
@@ -2034,17 +2050,19 @@ function saveMap () {
   if (preventActionOnEmptyMap('generating the code')) return
 
   try {
-    const mapName = document.getElementById('mapNameInput').value
-    const compressedMap = compressMapWithName(entities, mapName, coordAnchor, waveMode, cityLabelMode, mapMode)
-    const mapDataInput = document.getElementById('mapData')
-    const mobileMapData = document.getElementById('mobileMapData')
-
-    if (mapDataInput) mapDataInput.value = compressedMap
-    if (mobileMapData) mobileMapData.value = compressedMap
-
-    const newUrl = new URL(window.location.href)
-    newUrl.searchParams.set('mapData', compressedMap)
-    replaceBrowserUrlSafely(newUrl)
+    getShareableUrl()
+    const shortUrlKeyword = document.getElementById('shortUrlKeyword')
+    if (shortUrlKeyword?.value !== '') {
+      const shortUrlButton = document.getElementById('shortUrlButton')
+      const mobileShortUrlButton = document.getElementById('mobileShortUrlButton')
+      if (shortUrlButton) {
+        shortUrlButton.click()
+      } else {
+        if (mobileShortUrlButton) {
+          mobileShortUrlButton.click()
+        }
+      }
+    }
     markChangesSaved()
   } catch (e) {
     console.error('Error saving map:', e)
@@ -2055,17 +2073,7 @@ function saveMap () {
 function shareMap () {
   if (preventActionOnEmptyMap('sharing')) return
   try {
-    const mapName = document.getElementById('mapNameInput').value
-    const compressedMap = compressMapWithName(entities, mapName, coordAnchor, waveMode, cityLabelMode, mapMode)
-    const mapDataInput = document.getElementById('mapData')
-    const mobileMapData = document.getElementById('mobileMapData')
-
-    if (mapDataInput) mapDataInput.value = compressedMap
-    if (mobileMapData) mobileMapData.value = compressedMap
-
-    const longUrl = getShareableUrl(entities, mapName)
-    replaceBrowserUrlSafely(longUrl)
-
+    const longUrl = getShareableUrl()
     navigator.clipboard.writeText(longUrl)
       .then(() => {
         const copyMessage = document.getElementById('copyMessage')
@@ -2104,11 +2112,15 @@ const SHORT_URL_GENERATING_TEXT = 'Generating...';
 
   // simple default shortener endpoint (returns plain text)
   const config = {
-    tinyurlApi: 'https://tinyurl.com/api-create.php',
-    tinyurlManual: 'https://tinyurl.com/app/'
+    urlApi: 'https://wos-tools.fidgetcode.dev/link'
   }
 
   async function doShorten (longUrl) {
+    const shortUrlKeyword = document.getElementById('shortUrlKeyword')
+    if (shortUrlKeyword.value === '') {
+      alert('You need to provide a tag for the short url or choose a random one')
+      return null
+    }
     // show both containers (desktop + mobile) and reset fields
     if (shortUrlContainer) shortUrlContainer.classList.remove('hidden')
     if (mobileShortUrlContainer) mobileShortUrlContainer.classList.remove('hidden')
@@ -2121,65 +2133,51 @@ const SHORT_URL_GENERATING_TEXT = 'Generating...';
     if (shortUrlButton) shortUrlButton.disabled = true
     if (mobileShortUrlButton) mobileShortUrlButton.disabled = true
 
+    let success = true
+
     try {
       const controller = new AbortController()
       const timeout = setTimeout(() => controller.abort(), 10000)
-      const body = new URLSearchParams({ url: longUrl }).toString()
-      const resp = await fetch(config.tinyurlApi, {
+      const resp = await fetch(config.urlApi, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+          'Content-Type': 'application/json'
         },
-        body,
+        body: JSON.stringify({
+          url: longUrl,
+          id: shortUrlKeyword.value
+        }),
         signal: controller.signal
       })
       clearTimeout(timeout)
-      if (!resp.ok) throw new Error(`Shortener API error ${resp.status}`)
-      let text = await resp.text()
-
-      // some endpoints might return JSON - try parse
-      try {
-        const j = JSON.parse(text)
-        if (j && (j.shortUrl || j.result || (j.data && j.data.tiny_url))) {
-          text = j.shortUrl || j.result || j.data.tiny_url
-        }
-      } catch (_) {}
+      if (!resp.ok) {
+        throw new Error(`Shortener API error ${resp.status}`)
+      }
+      const data = await resp.json()
 
       // set both outputs
-      if (shortUrlOutput) shortUrlOutput.value = text
-      if (mobileShortUrlOutput) mobileShortUrlOutput.value = text
+      if (shortUrlOutput) shortUrlOutput.value = data.link
+      if (mobileShortUrlOutput) mobileShortUrlOutput.value = data.link
       markChangesSaved()
-      return text
+      return data.link
     } catch (err) {
       console.warn('Short URL failed', err)
-      if (shortUrlOutput) shortUrlOutput.value = ''
-      if (mobileShortUrlOutput) mobileShortUrlOutput.value = ''
-
-      // show manual fallback links
-      if (shortUrlError) {
-        shortUrlError.textContent = 'Shortening failed. '
-        const a = document.createElement('a')
-        a.href = `${config.tinyurlManual}?url=${encodeURIComponent(longUrl)}`
-        a.target = '_blank'
-        a.rel = 'noopener noreferrer'
-        a.textContent = 'Try manually'
-        a.className = 'underline text-blue-600'
-        shortUrlError.appendChild(a)
-      }
-      if (mobileShortUrlError) {
-        mobileShortUrlError.textContent = 'Shortening failed. '
-        const a = document.createElement('a')
-        a.href = `${config.tinyurlManual}?url=${encodeURIComponent(longUrl)}`
-        a.target = '_blank'
-        a.rel = 'noopener noreferrer'
-        a.textContent = 'Try manually'
-        a.className = 'underline text-blue-600'
-        mobileShortUrlError.appendChild(a)
-      }
+      success = false
       return null
     } finally {
       if (shortUrlButton) shortUrlButton.disabled = false
       if (mobileShortUrlButton) mobileShortUrlButton.disabled = false
+      if (!success) {
+        if (shortUrlOutput) {
+          shortUrlOutput.value = ''
+          shortUrlContainer.classList.add('hidden')
+        }
+        if (mobileShortUrlOutput) {
+          mobileShortUrlOutput.value = ''
+          mobileShortUrlContainer.classList.add('hidden')
+        }
+        alert('Error creating/updating short url, try again or contact developer.')
+      }
     }
   }
 
@@ -2233,10 +2231,10 @@ const SHORT_URL_GENERATING_TEXT = 'Generating...';
   if (shortUrlButton) {
     shortUrlButton.addEventListener('click', async () => {
       if (preventActionOnEmptyMap('generating a short URL')) return
-      const mapName = document.getElementById('mapNameInput')?.value || ''
-      const compressed = compressMapWithName(entities, mapName, coordAnchor, waveMode, cityLabelMode, mapMode)
-      if (document.getElementById('mapData')) document.getElementById('mapData').value = compressed
-      const longUrl = getShareableUrl(entities, mapName)
+      // const mapName = document.getElementById('mapNameInput')?.value || ''
+      // const compressed = compressMapWithName(entities, mapName, coordAnchor, waveMode, cityLabelMode, mapMode)
+      // if (document.getElementById('mapData')) document.getElementById('mapData').value = compressed
+      const longUrl = getShareableUrl()
       await doShorten(longUrl)
     })
   }
@@ -2245,10 +2243,10 @@ const SHORT_URL_GENERATING_TEXT = 'Generating...';
   if (mobileShortUrlButton) {
     mobileShortUrlButton.addEventListener('click', async () => {
       if (preventActionOnEmptyMap('generating a short URL')) return
-      const mapName = document.getElementById('mapNameInput')?.value || ''
-      const compressed = compressMapWithName(entities, mapName, coordAnchor, waveMode, cityLabelMode, mapMode)
-      if (document.getElementById('mobileMapData')) document.getElementById('mobileMapData').value = compressed
-      const longUrl = getShareableUrl(entities, mapName)
+      // const mapName = document.getElementById('mapNameInput')?.value || ''
+      // const compressed = compressMapWithName(entities, mapName, coordAnchor, waveMode, cityLabelMode, mapMode)
+      // if (document.getElementById('mobileMapData')) document.getElementById('mobileMapData').value = compressed
+      const longUrl = getShareableUrl()
       await doShorten(longUrl)
     })
   }
@@ -3772,10 +3770,24 @@ function decompressMapWithName (combinedString) {
 }
 
 // Pure helper to generate a shareable URL with provided map data and name
-function getShareableUrl (entitiesArg, mapNameArg) {
-  const compressedMap = compressMapWithName(entitiesArg, mapNameArg, coordAnchor, waveMode, cityLabelMode, mapMode)
+function getShareableUrl () {
+  const mapName = document.getElementById('mapNameInput').value
+  const compressedMap = compressMapWithName(entities, mapName, coordAnchor, waveMode, cityLabelMode, mapMode)
+  const mapDataInput = document.getElementById('mapData')
+  const mobileMapData = document.getElementById('mobileMapData')
+
+  if (mapDataInput) mapDataInput.value = compressedMap
+  if (mobileMapData) mobileMapData.value = compressedMap
+  const shortUrlKeyword = document.getElementById('shortUrlKeyword').value === '' ? undefined : document.getElementById('shortUrlKeyword').value
+
   const newUrl = new URL(window.location.href)
   newUrl.searchParams.set('mapData', compressedMap)
+  if (shortUrlKeyword !== undefined) {
+    newUrl.searchParams.set('key', shortUrlKeyword)
+  } else {
+    newUrl.searchParams.delete('key')
+  }
+  replaceBrowserUrlSafely(newUrl)
   return newUrl.toString()
 }
 
@@ -3863,15 +3875,19 @@ function loadMap () {
 function loadMapFromQuery () {
   const urlParams = new URLSearchParams(window.location.search)
   const mapDataParam = urlParams.get('mapData')
+  const shortKey = urlParams.get('key')
   if (mapDataParam) {
     mapData.value = mapDataParam
     loadMap()
+  }
+  if (shortKey) {
+    document.getElementById('shortUrlKeyword').value = shortKey
   }
 }
 
 function downloadCanvasAsPNG () {
   // High-resolution export (4x)
-  const scale = 2
+  const scale = 4
   const tempCanvas = document.createElement('canvas')
   const tempCtx = tempCanvas.getContext('2d')
 
@@ -3902,6 +3918,10 @@ function downloadCanvasAsPNG () {
 function markUnsavedChanges () {
   hasUnsavedChanges = true
   updatePageTitle()
+  const pill = document.getElementById('unsavedChangesPill')
+  if (pill) {
+    pill.classList.remove('hidden')
+  }
 }
 
 function markChangesSaved () {
@@ -3914,6 +3934,10 @@ function markChangesSaved () {
     lastSavedSnapshot = null
   }
   updatePageTitle()
+  const pill = document.getElementById('unsavedChangesPill')
+  if (pill) {
+    pill.classList.add('hidden')
+  }
 }
 
 function updatePageTitle () {
@@ -4601,6 +4625,15 @@ function redo () {
   historyIndex += 1
   applySnapshot(history[historyIndex])
   updateUndoRedoButtons()
+}
+
+function generateRandomShortTag () {
+  const characters = 'ABCDEFGHJKPQRSTUVWXYZ23456789'
+  let result = ''
+  for (let i = 0; i < 6; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length))
+  }
+  return result.substring(0, 3) + '-' + result.substring(3)
 }
 
 // ===== APPLICATION INITIALIZATION =====

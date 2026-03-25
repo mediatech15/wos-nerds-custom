@@ -26,9 +26,20 @@ body {
 
 /* Animation for entity placement */
 @keyframes entityPlace {
-    0% { transform: scale(0.5); opacity: 0.5; }
-    50% { transform: scale(1.2); opacity: 0.8; }
-    100% { transform: scale(1); opacity: 1; }
+    0% {
+        transform: scale(0.5);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 .entity-placed {
@@ -69,23 +80,10 @@ body {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* Toolbar button original colors */
-#toolbar-controls button[data-type="select"] {
-  background-color: #6b7280;
-}
-
-#toolbar-controls button[data-type="move"] {
-  background-color: #8b5cf6;
-}
-
-#toolbar-controls button#deleteButton {
-  background-color: #ef4444;
-}
-
 /* Selected state */
 #toolbar-controls button.bg-yellow-500,
 #toolbar-buildings button.bg-yellow-500 {
-  background-color: #eab308;
+    background-color: #eab308;
 }
 
 /* Prevent text selection while resizing */
@@ -153,16 +151,19 @@ body.resizing {
     #rightSidebar {
         display: none;
     }
+
     #topControls {
         margin-left: 0;
         margin-right: 0 !important;
     }
+
     #toolbar-controls {
         width: 100%;
         justify-content: center;
         flex-wrap: wrap;
         gap: 0.5rem;
     }
+
     #toolbar-controls button {
         flex: 0 0 auto;
         min-width: max-content;

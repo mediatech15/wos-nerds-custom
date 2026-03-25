@@ -3,7 +3,7 @@
  *
  * This script should be included in each page to load Tailwind CSS and set up the navbar.
  * Usage:
- * 1. Add this to the head of your HTML: <script src="/js/load-base.js"></script>
+ * 1. Add this to the head of your HTML: <script src="./js/load-base.js"></script>
  * 2. The script will automatically add Tailwind CSS and set up the navbar
  */
 
@@ -11,18 +11,18 @@
   // Create and inject Tailwind CSS link
   const tailwindLink = document.createElement('link')
   tailwindLink.rel = 'stylesheet'
-  tailwindLink.href = '/dist/css/tailwind.css'
+  tailwindLink.href = './css/built/tailwind.css'
   document.head.appendChild(tailwindLink)
 
   // Create and inject mobile enhancement script
   const mobileScript = document.createElement('script')
-  mobileScript.src = '/js/small-screen.js'
+  mobileScript.src = './js/small-screen.js'
   mobileScript.defer = true
   document.head.appendChild(mobileScript)
 
   // Create and inject navbar script
   const navbarScript = document.createElement('script')
-  navbarScript.src = '/js/navbar.js'
+  navbarScript.src = './js/navbar.js'
   navbarScript.defer = true
   document.head.appendChild(navbarScript)
 

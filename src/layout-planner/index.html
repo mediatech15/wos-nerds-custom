@@ -7,8 +7,8 @@
         <meta property="og:title" content="Alliance Layout Planner">
         <meta property="og:description" content="Check out this Layout!">
         <meta property="og:url" content="https://wosnerds.com/layout-planner/index.html">
-        <link rel="stylesheet" href="/css/built/tailwind.css?v=2">
-        <link rel="stylesheet" href="/layout-planner/css/style.css">
+        <link rel="stylesheet" href="../css/built/tailwind.css?v=2">
+        <link rel="stylesheet" href="./css/style.css">
         <link rel="stylesheet"
             href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
         <title>Layout Planner</title>
@@ -62,6 +62,13 @@
                 </div>
             </div>
         </div>
+        <div class="fixed top-24 left-0 right-0 z-40 pointer-events-none flex justify-center">
+            <div id="unsavedChangesPill"
+                class="bg-orange-500 cursor-pointer text-black text-center py-1 px-4 rounded-full pointer-events-auto inline-block text-sm font-semibold drop-shadow-[0px_0px_6px_rgba(0,0,0,0.7)] hidden">
+                Unsaved Changes! Click to save
+            </div>
+        </div>
+
 
         <!-- Right Sidebar -->
         <div id="rightSidebar"
@@ -156,6 +163,13 @@
                             <div class="p-4 border-b">
                                 <!-- Additional settings -->
                                 <div id="citySettingsButtons" class="flex justify-end gap-2 mb-3">
+                                    <div class="flex-grow items-center justify-between mb-2">
+                                        <button id="createNewTeamBtn"
+                                            class="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded">+
+                                            New Team</button>
+                                        <!-- <span class="text-sm font-medium">Teams</span> -->
+
+                                    </div>
                                     <!-- P1 = Clock toggle: toggles march times visibility on the canvas -->
                                     <button citySettingsButtons="1" id="toggleMarchtime" title="Marchtimes on/off"
                                         class="px-2 py-1 text-xs rounded bg-gray-100 hover:bg-gray-200">
@@ -201,12 +215,7 @@
 
                                 <!-- Team Management Section -->
                                 <div id="teamManagementSection" class="mb-4">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="text-sm font-medium">Teams</span>
-                                        <button id="createNewTeamBtn"
-                                            class="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded">+
-                                            New Team</button>
-                                    </div>
+
                                     <div id="teamsContainer" class="space-y-1">
                                         <!-- Teams will be populated by JS -->
                                     </div>
@@ -247,13 +256,24 @@
                                 Code</button>
                             <button id="saveAsCSVButton"
                                 class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium">Save
-                                as CSV</button>
+                                Players as CSV</button>
                             <button id="shareButton"
                                 class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium">Copy
-                                Link</button>
+                                Long Link</button>
                             <button id="shortUrlButton"
-                                class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium">Generate
+                                class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium">Create/Update
                                 Short URL</button>
+                            <div class="w-full flex justify-between">
+                                <input id="shortUrlKeyword" type="text" placeholder="Short URL tag..."
+                                    class="w-full p-3 border-2 border-gray-300 rounded-lg text-sm" />
+                                <button id="shortRandomTagButton"
+                                    class="w-full ml-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-medium">Random
+                                    Tag</button>
+                            </div>
+                            <div id="shortKeywordExplaination" class="mb-4 text-xs text-gray-600">
+                                Short url tag.<br />The <strong>tag</strong> is the end of the short url. Ex:
+                                micro.pink/<strong>{tag}</strong>
+                            </div>
                             <textarea id="mapData" rows="3" placeholder="Map code..."
                                 class="w-full p-3 border-2 border-gray-300 rounded-lg text-sm resize-none focus:border-blue-500 focus:outline-none"></textarea>
                             <button id="loadButton"
@@ -666,8 +686,8 @@
         <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js"
             integrity="sha384-HqC294x+jARmk/wUrzXlnRpiZrmiHJ4BIKph0mrcMJ/cLuMkNDHY0IjbDanCNhcU"
             crossorigin="anonymous"></script>
-        <script src="/layout-planner/js/script.js"></script>
-        <script src="/js/navbar.js"></script>
+        <script src="./js/script.js"></script>
+        <script src="../js/navbar.js"></script>
     </body>
 
 </html>
