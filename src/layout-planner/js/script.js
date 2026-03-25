@@ -18,6 +18,7 @@ const shortUrlOutput = document.getElementById('shortUrlOutput')
 const shortUrlError = document.getElementById('shortUrlError')
 const deleteButton = document.getElementById('deleteButton')
 const clearButton = document.getElementById('clearButton')
+const enemyLabel = document.getElementById('enemyNameInput')
 
 // ===== GRID CONFIGURATION =====
 const baseGridSize = 30
@@ -753,7 +754,7 @@ function drawEnemyZoneDetails (context, z, zone, screen) {
   context.font = `${baseFontSize}px Arial`
   context.textAlign = 'center'
   context.textBaseline = 'middle'
-  context.fillText('GUEST', screen.x, screen.y)
+  context.fillText(enemyLabel.value, screen.x, screen.y)
 }
 
 function traceEntityOutlinePath (context, pX, pY, z, entity) {
@@ -2024,6 +2025,11 @@ window.addEventListener('DOMContentLoaded', () => {
         updateCityList()
       }
     })
+  })
+
+  enemyLabel.addEventListener('change', () => {
+    redraw()
+    getShareableUrl()
   })
 })
 
@@ -3823,6 +3829,7 @@ function getShareableUrl () {
   } else {
     newUrl.searchParams.delete('key')
   }
+  newUrl.searchParams.set('enemy', enemyLabel.value)
   replaceBrowserUrlSafely(newUrl)
   return newUrl.toString()
 }
@@ -3912,6 +3919,7 @@ function loadMapFromQuery () {
   const urlParams = new URLSearchParams(window.location.search)
   const mapDataParam = urlParams.get('mapData')
   const shortKey = urlParams.get('key')
+  const enemyName = urlParams.get('enemy')
   if (mapDataParam) {
     mapData.value = mapDataParam
     loadMap()
@@ -3919,6 +3927,7 @@ function loadMapFromQuery () {
   if (shortKey) {
     document.getElementById('shortUrlKeyword').value = shortKey
   }
+  enemyLabel.value = enemyName || 'Guest'
 }
 
 function generatePNG () {
