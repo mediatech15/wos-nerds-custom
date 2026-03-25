@@ -7,10 +7,12 @@
     "watch:css": "npx tailwindcss -i ./src/css/tailwind.css -o ./src/css/built/tailwind.css --watch",
     "build": "npm run build:css & parcel build --no-source-maps",
     "build:ci": "npm run build:css & parcel build --no-source-maps",
-    "serve": "parcel serve -p 5500 --host localhost --watch-dir src --no-cors",
+    "serve": "parcel serve -p 5500",
     "build:browserslist": "npx update-browserslist-db@latest"
   },
   "devDependencies": {
+    "@parcel/compressor-brotli": "^2.16.4",
+    "@parcel/compressor-gzip": "^2.16.4",
     "browserslist": "^4.28.1",
     "caniuse-lite": "^1.0.30001781",
     "parcel": "^2.16.4",

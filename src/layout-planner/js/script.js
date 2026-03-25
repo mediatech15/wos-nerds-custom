@@ -2109,10 +2109,12 @@ const SHORT_URL_GENERATING_TEXT = 'Generating...';
   const mobileShortUrlOutput = document.getElementById('mobileShortUrlOutput')
   const shortUrlError = document.getElementById('shortUrlError')
   const mobileShortUrlError = document.getElementById('mobileShortUrlError')
+  const imageLinkButton = document.getElementById('imageLinkButton')
 
   // simple default shortener endpoint (returns plain text)
   const config = {
-    urlApi: 'https://wos-tools.fidgetcode.dev/link'
+    urlApi: 'https://wos-tools.fidgetcode.dev/link',
+    imageApi: 'https://wos-tools.fidgetcode.dev/image'
   }
 
   async function doShorten (longUrl) {
@@ -2274,6 +2276,37 @@ const SHORT_URL_GENERATING_TEXT = 'Generating...';
         if (mobileShortUrlError) mobileShortUrlError.textContent = ''
       } else {
         if (mobileShortUrlError) mobileShortUrlError.textContent = 'Could not copy URL.'
+      }
+    })
+  }
+
+  if (imageLinkButton) {
+    imageLinkButton.addEventListener('click', async () => {
+      getShareableUrl()
+      markChangesSaved()
+      const canvas = generatePNG()
+      const data = canvas.toDataURL('image/png').replace('data:image/png;base64,', '')
+      try {
+        const controller = new AbortController()
+        const timeout = setTimeout(() => controller.abort(), 100000)
+        const resp = await fetch(config.imageApi, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            data
+          }),
+          signal: controller.signal
+        })
+        clearTimeout(timeout)
+        const imageData = await resp.json()
+        console.log(imageData)
+        if (!resp.ok) {
+          throw new Error(`Shortener API error ${resp.status}`)
+        }
+      } catch (err) {
+        console.warn('Image URL failed', err)
       }
     })
   }
@@ -3885,7 +3918,7 @@ function loadMapFromQuery () {
   }
 }
 
-function downloadCanvasAsPNG () {
+function generatePNG () {
   // High-resolution export (4x)
   const scale = 4
   const tempCanvas = document.createElement('canvas')
@@ -3903,6 +3936,11 @@ function downloadCanvasAsPNG () {
   drawDiamondGrid(tempCtx, scaledPanX, scaledPanY, scaledZoom)
   drawEntities(tempCtx, scaledPanX, scaledPanY, scaledZoom)
   drawAnchorSymbol(tempCtx, scaledPanX, scaledPanY, scaledZoom)
+  return tempCanvas
+}
+
+function downloadCanvasAsPNG () {
+  const tempCanvas = generatePNG()
 
   tempCanvas.toBlob(function (blob) {
     const url = URL.createObjectURL(blob)
