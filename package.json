@@ -6,7 +6,7 @@
     "build:css": "npx tailwindcss -i ./src/css/tailwind.css -o ./src/css/built/tailwind.css",
     "watch:css": "npx tailwindcss -i ./src/css/tailwind.css -o ./src/css/built/tailwind.css --watch",
     "build": "npm run build:css & parcel build --no-source-maps",
-    "build:ci": "npm install --include-dev && npm run build:css & parcel build --no-source-maps",
+    "build:ci": "npm run build:css & parcel build --no-source-maps",
     "serve": "parcel serve -p 5500 --host localhost --watch-dir src --no-cors",
     "build:browserslist": "npx update-browserslist-db@latest"
   },
