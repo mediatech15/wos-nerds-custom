@@ -41,12 +41,9 @@ export async function onRequestPost (context) {
 
   if (resp.ok) {
     const linkData = await resp.json()
-    return Response.json({
-      link: linkData.shorturl,
-      message: linkData.message
-    })
+    return Response.json(linkData)
   }
 
-  const err = await link.text()
+  const err = await resp.text()
   return new Response('error creating short link', { status: 400, statusText: err })
 }
