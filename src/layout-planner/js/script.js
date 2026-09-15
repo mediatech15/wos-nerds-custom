@@ -2292,6 +2292,7 @@ const SHORT_URL_GENERATING_TEXT = 'Generating...';
       markChangesSaved()
       const canvas = generatePNG()
       const data = canvas.toDataURL('image/png').replace('data:image/png;base64,', '')
+      console.log('datauri:', data)
       try {
         const controller = new AbortController()
         const timeout = setTimeout(() => controller.abort(), 100000)
