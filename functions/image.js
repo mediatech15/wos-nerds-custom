@@ -3,6 +3,7 @@ export async function onRequestPost (context) {
   try {
     body = await context.request.json()
   } catch {
+    console.log('Error getting body', context.request)
     return new Response('Error getting body', { status: 400 })
   }
   const headers = {}
@@ -20,6 +21,7 @@ export async function onRequestPost (context) {
   }
 
   if (body.data === undefined) {
+    console.log('data must be defined in body', body)
     return new Response('data must be defined in body', { status: 400 })
   }
 
@@ -41,9 +43,11 @@ export async function onRequestPost (context) {
 
   if (resp.ok) {
     const linkData = await resp.json()
+    console.log('resonse', linkData)
     return Response.json(linkData)
   }
 
   const err = await resp.text()
+  console.log('error', err)
   return new Response('error creating short link', { status: 400, statusText: err })
 }
