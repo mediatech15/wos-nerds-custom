@@ -2202,7 +2202,7 @@ const SHORT_URL_GENERATING_TEXT = 'Generating...';
     [desktopMsg, mobileMsg].forEach(msg => {
       if (msg) {
         msg.classList.remove('hidden')
-        setTimeout(() => msg.classList.add('hidden'), 2000)
+        // setTimeout(() => msg.classList.add('hidden'), 2000)
       }
     })
   }
@@ -2308,11 +2308,14 @@ const SHORT_URL_GENERATING_TEXT = 'Generating...';
         clearTimeout(timeout)
         const imageData = await resp.json()
         if (!resp.ok) {
+          console.error(resp.json())
           throw new Error(`Shortener API error ${resp.status}`)
         }
         const url = imageData.image.url
         if (shortUrlOutput) shortUrlOutput.value = url
         if (mobileShortUrlOutput) mobileShortUrlOutput.value = url
+        shortUrlContainer.classList.remove('hidden')
+        mobileShortUrlContainer.classList.remove('hidden')
         markChangesSaved()
       } catch (err) {
         console.warn('Image URL failed', err)
