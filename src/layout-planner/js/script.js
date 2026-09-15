@@ -2292,7 +2292,11 @@ const SHORT_URL_GENERATING_TEXT = 'Generating...';
       markChangesSaved()
       const canvas = generatePNG()
       const data = canvas.toDataURL('image/png').replace('data:image/png;base64,', '')
+      const body = JSON.stringify({
+        data
+      })
       console.log('datauri:', data)
+      console.log('data:', body)
       try {
         const controller = new AbortController()
         const timeout = setTimeout(() => controller.abort(), 100000)
@@ -2301,9 +2305,7 @@ const SHORT_URL_GENERATING_TEXT = 'Generating...';
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            data
-          }),
+          body,
           signal: controller.signal
         })
         clearTimeout(timeout)
